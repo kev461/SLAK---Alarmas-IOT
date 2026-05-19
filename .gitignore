@@ -1,0 +1,7 @@
+.env
+.venv/
+.venv_slak
+*.jpeg
+uploads/*
+flask_alarmas/__pycache__/*
+

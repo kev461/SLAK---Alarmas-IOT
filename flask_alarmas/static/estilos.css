@@ -1,32 +1,49 @@
-/* Paleta: Mañana de Nuez Ámbar */
+/* ==========================================================================
+   Paleta y Variables: Desert Modernism 2.0
+   ========================================================================== */
 :root {
     --ambar-oxido: #B15636;
     --marron-grafito: #463F3A;
     --blanco-niebla: #EBEFEE;
     --canela-suave: #C88E69;
     --arena-nuez: #C1AA8D;
-    --bg-desert: #F2EDE4; /* Tono arena muy claro para fondo general */
+    --bg-desert: #F2EDE4;
+
+    /* Nuevas variables para modernismo */
+    --radio-suave: 16px;
+    --radio-boton: 50px;
+    --sombra-flotante: 0 10px 40px rgba(70, 63, 58, 0.08);
+    --sombra-hover: 0 15px 50px rgba(177, 86, 54, 0.15);
+    --vidrio-fondo: rgba(235, 239, 238, 0.85);
+    --vidrio-borde: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 body {
     background-color: var(--bg-desert);
     color: var(--marron-grafito);
     font-family: 'Inter', sans-serif;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
-/* Desert Modernism: Minimalismo y Líneas Limpias */
+/* ==========================================================================
+   Estructura Principal
+   ========================================================================== */
 
+/* Navbar con Glassmorfismo */
 .navbar {
-    background-color: var(--marron-grafito) !important;
-    padding: 1.5rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(70, 63, 58, 0.95) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand {
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    font-weight: 800;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--blanco-niebla) !important;
 }
@@ -34,103 +51,191 @@ body {
 .nav-link {
     color: var(--arena-nuez) !important;
     text-transform: uppercase;
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: 0.8rem;
+    font-weight: 600;
     margin-left: 2rem;
+    position: relative;
     transition: color 0.3s ease;
 }
 
-.nav-link:hover, .nav-link.active {
-    color: var(--canela-suave) !important;
+/* Efecto hover subrayado en enlaces */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background-color: var(--canela-suave);
+    transition: width 0.3s ease;
 }
 
-/* Hero Section */
+.nav-link:hover::after, .nav-link.active::after {
+    width: 100%;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--blanco-niebla) !important;
+}
+
+/* ==========================================================================
+   Página de Inicio (Hero & Secciones)
+   ========================================================================== */
+
 .hero-section {
-    padding: 10rem 0 6rem;
-    background: linear-gradient(180deg, var(--bg-desert) 0%, #E8E2D6 100%);
+    position: relative;
+    padding: 12rem 0 8rem;
+    background: linear-gradient(135deg, var(--bg-desert) 0%, #E8E2D6 100%);
+    overflow: hidden;
+}
+
+/* Orbes de fondo (decoración moderna) */
+.hero-section::before, .hero-section::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.4;
+}
+
+.hero-section::before {
+    top: -10%; left: -5%;
+    width: 400px; height: 400px;
+    background: var(--canela-suave);
+}
+
+.hero-section::after {
+    bottom: -10%; right: -5%;
+    width: 500px; height: 500px;
+    background: var(--arena-nuez);
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
 }
 
 .display-1 {
     font-weight: 800;
     color: var(--marron-grafito);
     text-transform: uppercase;
-    letter-spacing: -0.02em;
-    margin-bottom: 2rem;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
 }
 
 .lead {
     color: var(--ambar-oxido);
-    font-weight: 400;
-    font-size: 1.25rem;
+    font-weight: 500;
+    font-size: 1.35rem;
     max-width: 700px;
 }
 
-/* Botones */
+/* Botones Premium */
 .btn-primary {
     background-color: var(--ambar-oxido) !important;
+    color: var(--blanco-niebla) !important;
     border: none !important;
-    border-radius: 0;
+    border-radius: var(--radio-boton);
     padding: 1rem 2.5rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 15px rgba(177, 86, 54, 0.3);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .btn-primary:hover {
     background-color: var(--marron-grafito) !important;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(70, 63, 58, 0.4);
 }
 
 .btn-secondary {
     background-color: transparent !important;
     border: 2px solid var(--marron-grafito) !important;
     color: var(--marron-grafito) !important;
-    border-radius: 0;
-    padding: 1rem 2.5rem;
-    font-weight: 600;
+    border-radius: var(--radio-boton);
+    padding: 0.9rem 2.5rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
 }
 
-/* Tarjetas de Monitor */
+.btn-secondary:hover {
+    background-color: var(--marron-grafito) !important;
+    color: var(--blanco-niebla) !important;
+    transform: translateY(-3px);
+}
+
+/* ==========================================================================
+   Tarjetas Generales
+   ========================================================================== */
+
 .monitor-card {
-    background-color: var(--blanco-niebla);
-    border: none;
-    border-radius: 0;
-    padding: 3rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease;
+    background: var(--vidrio-fondo);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: var(--vidrio-borde);
+    border-radius: var(--radio-suave);
+    padding: 2.5rem;
+    box-shadow: var(--sombra-flotante);
+    transition: all 0.4s ease;
+    height: 100%;
 }
 
 .monitor-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
+    box-shadow: var(--sombra-hover);
 }
 
 .monitor-label {
     text-transform: uppercase;
     font-size: 0.75rem;
     font-weight: 700;
+    letter-spacing: 0.1em;
     color: var(--arena-nuez);
     margin-bottom: 0.5rem;
     display: block;
 }
 
-.monitor-value {
-    font-size: 3rem;
-    font-weight: 300;
-    color: var(--marron-grafito);
+/* ==========================================================================
+   Formularios
+   ========================================================================== */
+
+.form-control {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    border: 1px solid rgba(193, 170, 141, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 1rem 1.5rem !important;
+    color: var(--marron-grafito) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-/* Footer */
+.form-control:focus {
+    background-color: var(--blanco-niebla) !important;
+    border-color: var(--canela-suave) !important;
+    box-shadow: 0 0 0 4px rgba(200, 142, 105, 0.1) !important;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
 footer {
-    padding: 4rem 0;
+    padding: 5rem 0;
     background-color: var(--blanco-niebla);
-    border-top: 1px solid var(--arena-nuez);
-    font-size: 0.8rem;
+    border-top: 1px solid rgba(193, 170, 141, 0.2);
+    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--arena-nuez);
+    letter-spacing: 0.15em;
+    color: var(--marron-grafito);
+    opacity: 0.8;
 }
 
 /* Clases de Estado */

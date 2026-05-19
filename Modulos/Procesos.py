@@ -42,8 +42,8 @@ def obtener_ultimo_dato_mongo():
     try:
         from pymongo import MongoClient
         client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
-        db = client['tu_base_datos']
-        coleccion = db['tu_coleccion']
+        db = client['flask_alarmas']
+        coleccion = db['sensores_iot']
         return coleccion.find_one(sort=[('_id', -1)])
     except Exception as e:
         print(f"Error de conexión con MongoDB: {e}")
@@ -59,6 +59,6 @@ def guardar_en_mongo(data):
     try:
         from pymongo import MongoClient
         client = MongoClient(MONGO_URI)
-        client['tu_base_datos']['tu_coleccion'].insert_one(data)
+        client['flask_alarmas']['sensores_iot'].insert_one(data)
     except Exception as e:
         print(f"Error guardando en Mongo: {e}")
