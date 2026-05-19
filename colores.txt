@@ -1,0 +1,14 @@
+Tech Color Palette
+
+Fondo: Dark Slate.
+Botón de "Sistema Armado": Electric Teal.
+Iconos de sensores (inactivos): Viridian Green.
+Alertas o avisos: Golden Bronze.
+Textos secundarios: Deep Espresso (sobre fondos claros) o variaciones del gris.
+
+Mañana de nuez ambar
+Ámbar Óxido (#B15636): Tu color de acción. Es enérgico y se nota de inmediato.
+Marrón Grafito (#463F3A): El color de estructura. Perfecto para fondos de menús o botones secundarios.
+Blanco Niebla (#EBEFEE): Para textos y claridad. Es limpio pero suave, ideal para lecturas largas.
+Canela Suave (#C88E69): Úsalo para estados intermedios (ej. sistema desarmado pero con puertas abiertas).
+Arena Nuez (#C1AA8D): El tono neutro para iconos inactivos o detalles decorativos.

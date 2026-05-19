@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-1">Seguridad y calma</h1>
+                <p class="lead mb-5">
+                    Un sistema de alarmas inteligente diseñado bajo los principios de la serenidad digital: simplicidad, funcionalidad e integración total.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('monitor') }}" class="btn btn-primary">Entrar al Monitor</a>
+                    <a href="#arquitectura" class="btn btn-secondary">Ver Arquitectura</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="arquitectura" class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-md-4">
+                <span class="monitor-label">Parámetros</span>
+                <h3 class="fw-bold">Reactividad Inteligente</h3>
+                <p>El sistema reacciona en tiempo real según parámetros físicos: temperatura, humedad y presencia de gas o llama, procesando cada dato mediante una lógica de decisión modular.</p>
+            </div>
+            <div class="col-md-4">
+                <span class="monitor-label">Core Tech</span>
+                <h3 class="fw-bold">Stack Moderno</h3>
+                <p>Construido sobre <strong>Flask</strong> para la agilidad web, <strong>MongoDB</strong> para la persistencia escalable e <strong>IoT con CreatePi</strong> para la integración con el hardware.</p>
+            </div>
+            <div class="col-md-4">
+                <span class="monitor-label">Propósito</span>
+                <h3 class="fw-bold">Diseño No Convencional</h3>
+                <p>Adoptamos un diseño no convencional que brinda comodidad visual, además de apuntar a un dashboard que te asegura seguridad según parámetros en tiempo casi real.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container text-center py-5">
+        <h2 class="display-4 fw-light mb-4">Sincronización Total</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <p class="text-muted">El motor de datos y la interfaz web funcionan como entidades independientes, garantizando que tu seguridad nunca se detenga, incluso si la red fluctúa.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,139 @@
+/* Paleta: Mañana de Nuez Ámbar */
+:root {
+    --ambar-oxido: #B15636;
+    --marron-grafito: #463F3A;
+    --blanco-niebla: #EBEFEE;
+    --canela-suave: #C88E69;
+    --arena-nuez: #C1AA8D;
+    --bg-desert: #F2EDE4; /* Tono arena muy claro para fondo general */
+}
+
+body {
+    background-color: var(--bg-desert);
+    color: var(--marron-grafito);
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.02em;
+    line-height: 1.6;
+}
+
+/* Desert Modernism: Minimalismo y Líneas Limpias */
+
+.navbar {
+    background-color: var(--marron-grafito) !important;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blanco-niebla) !important;
+}
+
+.nav-link {
+    color: var(--arena-nuez) !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-left: 2rem;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--canela-suave) !important;
+}
+
+/* Hero Section */
+.hero-section {
+    padding: 10rem 0 6rem;
+    background: linear-gradient(180deg, var(--bg-desert) 0%, #E8E2D6 100%);
+}
+
+.display-1 {
+    font-weight: 800;
+    color: var(--marron-grafito);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+}
+
+.lead {
+    color: var(--ambar-oxido);
+    font-weight: 400;
+    font-size: 1.25rem;
+    max-width: 700px;
+}
+
+/* Botones */
+.btn-primary {
+    background-color: var(--ambar-oxido) !important;
+    border: none !important;
+    border-radius: 0;
+    padding: 1rem 2.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--marron-grafito) !important;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: transparent !important;
+    border: 2px solid var(--marron-grafito) !important;
+    color: var(--marron-grafito) !important;
+    border-radius: 0;
+    padding: 1rem 2.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Tarjetas de Monitor */
+.monitor-card {
+    background-color: var(--blanco-niebla);
+    border: none;
+    border-radius: 0;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.monitor-card:hover {
+    transform: translateY(-5px);
+}
+
+.monitor-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--arena-nuez);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.monitor-value {
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--marron-grafito);
+}
+
+/* Footer */
+footer {
+    padding: 4rem 0;
+    background-color: var(--blanco-niebla);
+    border-top: 1px solid var(--arena-nuez);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--arena-nuez);
+}
+
+/* Clases de Estado */
+.status-danger { color: var(--ambar-oxido); }
+.status-warning { color: var(--canela-suave); }
+.status-safe { color: var(--arena-nuez); }

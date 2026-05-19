@@ -1,0 +1,53 @@
+PRIMERO — PROBLEMA CRÍTICO (multiplexación)
+
+Tu placa NO permite usar todo al mismo tiempo.
+
+Ejemplo claro:
+
+Gas → Pin 37
+LED → Pin 37
+Infrarrojo → Pin 37
+
+❌ NO pueden coexistir
+✅ Solo uno activo vía UX
+
+CONFIGURACIÓN ÓPTIMA PARA TU PROYECTO
+
+Vamos a elegir sensores sin conflictos reales:
+
+🔌 Sensores que SÍ puedes usar juntos
+Sensor	Pin	UX
+Gas	Pin37	UX2-7
+Llama	Pin33	UX1-5
+DHT11	Pin11	UX4-1
+Sonido	Pin18	UX3-6
+Luz (I2C)	I2C 0x5c	—
+⚙️ Actuadores
+Actuador	Pin	UX
+Buzzer activo	Pin12	—
+Relé	Pin40	—
+LED RGB	13,15,29	UX1-1,2,3
+
+COSAS QUE NO USAREMOS (para evitar conflictos)
+LED simple (Pin37 ❌ choca con gas)
+Sensor táctil (Pin11 ❌ choca con DHT11)
+Paso a paso (usa muchos pines compartidos)
+Servo (Pin22 conflictivo)
+
+CONFIGURACIÓN DE SWITCHES UX
+
+Activa SOLO esto:
+
+UX1:
+UX1-1 ✅ (RGB R)
+UX1-2 ✅ (RGB G)
+UX1-3 ✅ (RGB B)
+UX1-5 ✅ (llama)
+UX2:
+UX2-7 ✅ (gas)
+UX3:
+UX3-6 ✅ (sonido)
+UX4:
+UX4-1 ✅ (DHT11)
+
+👉 TODO lo demás en OFF

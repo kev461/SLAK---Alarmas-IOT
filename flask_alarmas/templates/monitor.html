@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<section class="py-5">
+    <div class="container py-5">
+        <div class="row mb-5">
+            <div class="col-md-8">
+                <span class="monitor-label">Estado del Sistema</span>
+                <h1 class="display-4 fw-bold">Monitor de Sensores</h1>
+            </div>
+            <div class="col-md-4 text-md-end pt-4">
+                <span id="peligro" class="badge rounded-0 p-3 fs-6" style="background-color: var(--arena-nuez);">MODO OFFLINE</span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Principales -->
+            <div class="col-md-6 col-lg-4">
+                <div class="monitor-card">
+                    <span class="monitor-label">Temperatura</span>
+                    <div id="temp" class="monitor-value">--</div>
+                    <span class="text-muted small uppercase">Grados Celsius</span>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="monitor-card">
+                    <span class="monitor-label">Humedad</span>
+                    <div id="hum" class="monitor-value">--</div>
+                    <span class="text-muted small uppercase">Porcentaje RH</span>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="monitor-card">
+                    <span class="monitor-label">Presencia de Gas</span>
+                    <div id="gas" class="monitor-value">--</div>
+                    <span class="text-muted small uppercase">Sensor MQ-2</span>
+                </div>
+            </div>
+
+            <!-- Secundarios -->
+            <div class="col-md-4">
+                <div class="monitor-card py-4">
+                    <span class="monitor-label">Sensor de Llama</span>
+                    <h4 id="llama" class="fw-light m-0">--</h4>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="monitor-card py-4">
+                    <span class="monitor-label">Nivel de Sonido</span>
+                    <h4 id="sonido" class="fw-light m-0">--</h4>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="monitor-card py-4">
+                    <span class="monitor-label">Última Alerta</span>
+                    <h4 id="alerta" class="fw-light m-0">Ninguna</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SocketIO -->
+<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+<script>
+const socket = io();
+
+socket.on('nuevo_dato', function(data) {
+    console.log("Nuevo dato recibido:", data);
+
+    document.getElementById("temp").innerText = data.temp || "--";
+    document.getElementById("hum").innerText = data.hum || "--";
+    document.getElementById("gas").innerText = data.gas || "--";
+    document.getElementById("llama").innerText = data.llama || "--";
+    document.getElementById("sonido").innerText = data.sonido || "--";
+
+    const peligro = document.getElementById("peligro");
+    peligro.innerText = data.peligro || "NORMAL";
+
+    // Dinamismo Slak IoT Style
+    if (data.peligro === "ALTO" || data.peligro === "MODO_OFFLINE") {
+        peligro.style.backgroundColor = "var(--ambar-oxido)";
+    } else if (data.peligro === "MEDIO") {
+        peligro.style.backgroundColor = "var(--canela-suave)";
+    } else {
+        peligro.style.backgroundColor = "var(--arena-nuez)";
+    }
+});
+</script>
+{% endblock %}
