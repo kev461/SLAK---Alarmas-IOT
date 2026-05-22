@@ -413,26 +413,27 @@ function fetchUltimo() {
 // Cuando llegue un dato de socket, también actualizamos el panel
 // ================================================================
 
-/*
+
 const socket = io();
 socket.on('nuevo_dato', function(data) {
   // Adaptar campos del socket al formato del panel
   const mapped = {
-    temperatura:    parseFloat(data.temp)    || 0,
-    humedad:        parseFloat(data.hum)     || 0,
+    temperatura:    parseFloat(data.temperatura)    || 0,
+    humedad:        parseFloat(data.humedad)     || 0,
     luz:            parseInt(data.luz)       || 0,
-    humo:           data.gas === 'SÍ' ? 1 : 0,
-    llama:          data.llama === 'SÍ' ? 1 : 0,
-    movimiento:     data.sonido === 'SÍ' ? 1 : 0,
+    humo:           data.humo === 1 ? 1 : 0,
+    llama:          data.llama === 1 ? 1 : 0,
+    movimiento:     data.movimiento === 1 ? 1 : 0,
     nivel_peligro:  data.nivel_peligro || 1,
     puntos_peligro: data.puntos_peligro || 0,
-    fecha_registro: new Date().toISOString(),
+    fecha_registro: data.fecha_registro.$date
+
   };
   actualizarPanelUltimo(mapped);
 });
 
-// TODO: Esta parte no funciona actualmente.z
-*/
+// TODO: Hacer una función que deje de actualizarse si no está en linea la placa
+
 
 
 // ================================================================

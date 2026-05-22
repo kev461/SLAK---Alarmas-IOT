@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
+from bson import json_util
 from pymongo import MongoClient
 
 # Asegurar acceso a los módulos del proyecto

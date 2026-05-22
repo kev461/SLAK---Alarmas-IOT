@@ -1,18 +1,13 @@
-import os
 import time
-import json
 import pandas as pd
 import Modulos.SMTP as SMTP
 from Modulos.validador import validar
 from Modulos.normalizador import normalizar
-from bson import json_util
-from dotenv import load_dotenv 
 
 # --- CONFIGURACIÓN DE SEGURIDAD ---
-MONGO_URI     = os.getenv('IOT_MONGO_URI')
-MONGO_DB      = os.getenv('IOT_MONGO_DB')
-MONGO_COL     = os.getenv('IOT_MONGO_COLECCION')
 USA_MONGO = True  # Cambia a True cuando quieras conectar con Atlas
+MONGO_URI = "mongodb+srv://tu_usuario:<db_password>@cluster0.mongodb.net/"
+UMBRAL = 80
 
 def procesar_dato_arduino(data):
     """
@@ -47,9 +42,9 @@ def obtener_ultimo_dato_mongo():
     try:
         from pymongo import MongoClient
         client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
-        db = client[MONGO_DB]
-        coleccion = db[MONGO_COL]
-        return json.loads(json_util.dumps(coleccion.find_one(sort=[('_id', -1)])))
+        db = client['flask_alarmas']
+        coleccion = db['sensores_iot']
+        return coleccion.find_one(sort=[('_id', -1)])
     except Exception as e:
         print(f"Error de conexión con MongoDB: {e}")
         return None

@@ -3,5 +3,6 @@
 .venv_slak
 *.jpeg
 uploads/*
-flask_alarmas/__pycache__/*
+flask_alarmas/__pycache__
+Modulos/__pycache__
 

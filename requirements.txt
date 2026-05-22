@@ -1,17 +1,19 @@
 # Manejo de variables de entorno (.env)
 python-dotenv
+
 # Manejo de datos y archivos Excel/CSV
 pandas
 openpyxl
+
 # Framework Web y rutas
 flask
+
 # Comunicación en tiempo real (WebSockets)
 flask-socketio
+
 # Conexión a Base de Datos (MongoDB Atlas)
 pymongo
 dnspython
-
-
 
 # Comunicación Serial (Arduino)
 pyserial
