@@ -10,8 +10,9 @@
   :root {
     --peligro-1: #C1AA8D;          /* arena-nuez — Normal           */
     --peligro-2: #B15636;          /* ambar-oxido — Alerta          */
-    --peligro-3: #7A1C1C;          /* rojo tierra — Peligro Crítico */
+    --peligro-3: #8B0000;          /* rojo oscuro — Peligro Crítico */
     --peligro-text: var(--blanco-niebla);
+    --conectado: #28a745;          /* Verde para estado en línea */
   }
 
   /* ---- Hero header ---- */
@@ -32,6 +33,10 @@
     justify-content: space-between;
     min-height: 160px;
   }
+  /* Animación para nivel 3 */
+  @keyframes blink-alert { 50% { opacity: 0.8; } }
+  .peligro-3-anim { animation: blink-alert 1s infinite; }
+
   .peligro-nivel-num {
     font-size: 5rem;
     font-weight: 800;
@@ -318,8 +323,8 @@
 
 </div><!-- /container -->
 
-<!-- SocketIO -->
-<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+<!-- Socket.IO Cliente -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
 // ================================================================
 // CONFIGURACIÓN
@@ -355,12 +360,6 @@ function actualizarPanelUltimo(d) {
   // Nivel de peligro
   const nivel = d.nivel_peligro || 1;
   actualizarPeligro(nivel, d.puntos_peligro);
-
-  // Status dot
-  const dot = document.getElementById('status-dot');
-  dot.textContent = 'EN LÍNEA';
-  dot.style.background = 'var(--peligro-1)';
-  dot.style.color = 'var(--marron-grafito)';
 }
 
 function actualizarBinario(sensor, valor, textoActivo, textoInactivo) {
@@ -381,6 +380,10 @@ function actualizarPeligro(nivel, puntos) {
   document.getElementById('peligro-num').textContent  = nivel;
   document.getElementById('peligro-desc').textContent = info.texto;
   document.getElementById('peligro-pts').textContent  = (puntos != null) ? puntos.toFixed(1) : '—';
+
+  // Animación si es nivel crítico
+  if (nivel === 3) card.classList.add('peligro-3-anim');
+  else card.classList.remove('peligro-3-anim');
 
   // Dots
   for (let i = 1; i <= 3; i++) {
