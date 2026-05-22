@@ -80,23 +80,12 @@ ETIQUETAS_NIVEL = {
     3: "PELIGRO CRÍTICO", # Antes Nivel 5
 }
 
-def procesar_linea(linea_cruda: str, coleccion) -> dict:
+def procesar_linea(resultado: dict, coleccion) -> dict:
     """
-    Procesa una línea cruda del Arduino:
-    1. Parsea y normaliza los datos del sensor (tolerante a JSON o CSV)
-    2. Calcula el nivel de peligro (1-5) con el motor ×1.7
-    3. Añade timestamp
-    4. Guarda en MongoDB
-    5. Retorna el documento guardado
+    Guarda en MongoDB el resultado ya calculado.
+    Mantiene exactamente el mismo formato de documento que tenías antes.
     """
-    linea = linea_cruda.strip()
-    if not linea:
-        return None
-
-    # Calcular peligro (el módulo detecta formato automáticamente)
-    resultado = calcular_peligro_streaming(linea)
-
-    # Construir documento enriquecido para MongoDB
+    # Construir documento enriquecido para MongoDB (Mismo formato original)
     documento = {
         **resultado['datos_sensor'],          # Todos los campos del sensor
         'puntos_peligro':  resultado['puntos'],
@@ -120,25 +109,18 @@ def procesar_linea(linea_cruda: str, coleccion) -> dict:
 
     return documento
 
-def procesar_linea_dashboard(linea_cruda: str, sio_client=None) -> dict:
+def procesar_linea_dashboard(resultado: dict, sio_client=None) -> dict:
     """
-    Procesa una línea del Arduino y la inyecta DIRECTAMENTE al Dashboard de Flask.
-    A diferencia de 'procesar_linea', esta función NO guarda en MongoDB para
-    evitar latencia o duplicidad, enfocándose solo en la visualización en vivo.
+    Inyecta el resultado al Dashboard de Flask.
+    Convierte la fecha a string ISO para que el WebSocket (JSON) no falle.
     """
-    linea = linea_cruda.strip()
-    if not linea:
-        return None
-
-    # 1. Calcular peligro (normalización y motor x1.7)
-    resultado = calcular_peligro_streaming(linea)
-
-    # 2. Construir documento optimizado para JSON (SocketIO)
+    # Construir documento optimizado para JSON
     documento = {
         **resultado['datos_sensor'],
         'puntos_peligro':  resultado['puntos'],
         'nivel_peligro':   resultado['nivel_peligro'],
-        'fecha_registro':  datetime.utcnow().isoformat(), # Formato string para compatibilidad JSON
+        # Usamos ISO format aquí porque JSON no soporta objetos datetime de Python
+        'fecha_registro':  datetime.utcnow().isoformat(), 
         'fuente':          'arduino_realtime',
     }
 
@@ -179,12 +161,15 @@ def iniciar_streaming_serial(coleccion, sio_client=None):
             if linea_bytes:
                 linea = linea_bytes.decode('utf-8', errors='replace').strip()
                 if linea:
-                    # FLUJO 1: Persistencia e Historial (MongoDB)
-                    procesar_linea(linea, coleccion)
+                    # CALCULO ÚNICO: Se hace una vez para asegurar consistencia
+                    resultado = calcular_peligro_streaming(linea)
+
+                    # FLUJO 1: Guardar en MongoDB Atlas (Tal cual como estaba)
+                    procesar_linea(resultado, coleccion)
                     
-                    # FLUJO 2: Visualización en Tiempo Real (Dashboard Flask)
+                    # FLUJO 2: Enviar al Dashboard (Sin afectar a Mongo)
                     if sio_client:
-                        procesar_linea_dashboard(linea, sio_client)
+                        procesar_linea_dashboard(resultado, sio_client)
     except KeyboardInterrupt:
         print("\n[Serial] Streaming detenido por el usuario.")
     finally:
