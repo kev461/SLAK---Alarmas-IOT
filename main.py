@@ -23,7 +23,7 @@ if __name__ == '__main__':
     if SIO_DISPONIBLE and socketio:
         sio = socketio.Client()
         try:
-            sio.connect('http://localhost:5000') # Asegúrate que Flask esté corriendo en este puerto
+            sio.connect('http://127.0.0.1:5000') # Asegúrate que Flask esté corriendo en este puerto
             print("[SocketIO] ✅ Conectado al Dashboard de Flask.")
         except Exception:
             print("[SocketIO] ⚠️ No se pudo conectar al Dashboard. Los datos solo se guardarán en MongoDB.")
