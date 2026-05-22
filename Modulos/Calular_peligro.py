@@ -1,11 +1,10 @@
 """
 Módulo: Calcular_peligro.py
-Descripción: Determina el nivel de peligro (1 a 3) basado en reglas directas.
+Descripción: Calcula el nivel de peligro (1 a 5) de una lectura de sensores IoT.
 
-Lógica de Score Final:
-  - Nivel 3: Gas + Llama detectados simultáneamente.
-  - Nivel 2: Gas detectado O Llama detectada por más de X segundos.
-  - Nivel 1: Temperatura > 27°C o estado Normal.
+Estrategia de puntuación:
+  - Fuente 1: Sensores individuales con margen de susceptibilidad de laboratorio (×1.7)
+  - Fuente 2: Combinaciones sinérgicas de sensores que juntos indican escenarios peligrosos
 
 Soporta dos modos:
   - calcular_peligro_fila(fila): Para UNA fila (dict). Uso en Streaming y en Batch fila a fila.
@@ -14,23 +13,47 @@ Soporta dos modos:
 
 import re
 import json
-import time
 
 # ==============================================================================
 # CONFIGURACIÓN DEL MOTOR DE PELIGRO
 # Ajusta estos valores para calibrar la sensibilidad del sistema
 # ==============================================================================
+
+# Factor de susceptibilidad de laboratorio.
+# 1.7 = los sensores disparan con un 30% menos de margen del umbral normal.
+FACTOR_SUSCEPTIBILIDAD = 1.8
+
+# --- Umbrales base de sensores individuales ---
+# (Condición de activación, puntos base ANTES de aplicar el factor)
+UMBRAL_TEMPERATURA_MEDIA  = 35   # °C: Ambiente caliente
+UMBRAL_TEMPERATURA_ALTA   = 45   # °C: Riesgo de quemaduras / incendio
+
+PUNTOS_HUMO               = 3.0  # pts: Presencia de humo es señal directa de riesgo
+PUNTOS_LLAMA              = 2.0  # pts: Llama detectada
+PUNTOS_TEMP_MEDIA         = 1.5  # pts: Temperatura alta (primer umbral)
+PUNTOS_TEMP_ALTA          = 3.0  # pts: Temperatura muy alta (segundo umbral, reemplaza la media)
+PUNTOS_HUMEDAD_ALTA       = 0.5  # pts: Humedad muy alta (>85%) puede indicar vapor de un incendio
+UMBRAL_HUMEDAD_ALTA       = 85   # %RH
+
+PUNTOS_LUZ_ALTA           = 0.5  # pts: Luz muy alta (>50000 Lux) puede indicar fuego brillante
+UMBRAL_LUZ_ALTA           = 50000
+
+PUNTOS_MOVIMIENTO         = 0.5  # pts: Movimiento detectado (solo suma si hay otro factor activo)
+
+# --- Puntos extra por combinaciones sinérgicas (independientes de los individuales) ---
+PUNTOS_SINERGIA_FUEGO_TOTAL      = 7.0  # Humo + Llama + Temp alta = Incendio declarado
+PUNTOS_SINERGIA_INCENDIO_ACTIVO  = 5.0  # Humo + Llama = Incendio activo (sin temp confirmada)
+PUNTOS_SINERGIA_FUEGO_SIN_LLAMA  = 3.0  # Humo + Temp alta = Fuego probable sin llama visible
+PUNTOS_SINERGIA_LLAMA_CALIENTE   = 3.0  # Llama + Temp alta = Llama con ambiente cálido
+PUNTOS_SINERGIA_PRESENCIA_RIESGO = 2.0  # Movimiento + (Humo o Llama) = Persona en zona de riesgo
+
+# --- Bandas de puntuación → Nivel de peligro (1 a 5) ---
+# Cada tupla es (puntos_mínimos, nivel)
 BANDAS_PELIGRO = [
-    (3.0, 3),  # Peligro Crítico
-    (2.0, 2),  # Alerta
+    (10.0, 3),  # Peligro Crítico (antes 4 y 5)
+    (5.0,  2),  # Alerta (antes 2 y 3)
     (0.0,  1),  # Normal
 ]
-
-UMBRAL_TEMPERATURA_NIVEL_1 = 27.0
-UMBRAL_SEGUNDOS_LLAMA      = 5.0
-
-# Variable para rastrear cuánto tiempo lleva activa la llama (Uso en tiempo real)
-_llama_inicio_time = None
 
 # ==============================================================================
 # FUNCIÓN CORE: Opera sobre un diccionario con los campos del sensor
@@ -42,43 +65,76 @@ def _calcular_puntos(fila: dict) -> float:
     Acepta un diccionario con claves: humo, llama, temperatura, humedad, luz, movimiento.
     Las claves que no existan se asumen como valor 0 (sin novedad).
     """
-    global _llama_inicio_time
-
     # Normalizar: extraer valores con fallback a 0 (tolerante a campos faltantes)
-    humo        = int(fila.get('humo', 0)) or int(fila.get('gas', 0)) # Mapeo gas/humo
+    humo        = int(fila.get('humo', 0))
     llama       = int(fila.get('llama', 0))
     temperatura = float(fila.get('temperatura', 0.0))
+    humedad     = float(fila.get('humedad', 0.0))
+    luz         = float(fila.get('luz', 0.0))
+    movimiento  = int(fila.get('movimiento', 0))
+    
+    puntos = 0.0
+    hay_factor_primario = False  # Para decidir si el movimiento suma
 
-    # 1. Regla Crítica: Gas y Llama -> Peligro 3
-    if humo == 1 and llama == 1:
-        return 3.0
-
-    # 2. Regla Alerta: Gas detectado -> Peligro 2
+    # ----------------------------------------------------------------
+    # FUENTE 1: Sensores Individuales × Factor de Susceptibilidad
+    # ----------------------------------------------------------------
     if humo == 1:
-        return 2.0
+        puntos += PUNTOS_HUMO * FACTOR_SUSCEPTIBILIDAD
+        hay_factor_primario = True
 
-    # 3. Regla Alerta: Llama persistente por más de X segundos -> Peligro 2
     if llama == 1:
-        if _llama_inicio_time is None:
-            _llama_inicio_time = time.time()
-        
-        duracion = time.time() - _llama_inicio_time
-        if duracion > UMBRAL_SEGUNDOS_LLAMA:
-            return 2.0
+        puntos += PUNTOS_LLAMA * FACTOR_SUSCEPTIBILIDAD
+        hay_factor_primario = True
+
+    # La temperatura usa el umbral más alto que supere (no suma ambos)
+    if temperatura > UMBRAL_TEMPERATURA_ALTA:
+        puntos += PUNTOS_TEMP_ALTA * FACTOR_SUSCEPTIBILIDAD
+        hay_factor_primario = True
+    elif temperatura > UMBRAL_TEMPERATURA_MEDIA:
+        puntos += PUNTOS_TEMP_MEDIA * FACTOR_SUSCEPTIBILIDAD
+        hay_factor_primario = True
+
+    if humedad > UMBRAL_HUMEDAD_ALTA:
+        puntos += PUNTOS_HUMEDAD_ALTA * FACTOR_SUSCEPTIBILIDAD
+
+    if luz > UMBRAL_LUZ_ALTA:
+        puntos += PUNTOS_LUZ_ALTA * FACTOR_SUSCEPTIBILIDAD
+
+    # Movimiento solo suma si ya hay otro factor activo (evita falsos positivos de personas)
+    if movimiento == 1 and hay_factor_primario:
+        puntos += PUNTOS_MOVIMIENTO * FACTOR_SUSCEPTIBILIDAD
+
+    # ----------------------------------------------------------------
+    # FUENTE 2: Combinaciones Sinérgicas (puntos adicionales)
+    # ----------------------------------------------------------------
+    temp_alta = temperatura > UMBRAL_TEMPERATURA_MEDIA  # Umbral de sinergia (más permisivo)
+    
+    # La más grave se evalúa primero y excluye las demás de su categoría
+    if humo == 1 and llama == 1 and temp_alta:
+        puntos += PUNTOS_SINERGIA_FUEGO_TOTAL
+    elif humo == 1 and llama == 1:
+        puntos += PUNTOS_SINERGIA_INCENDIO_ACTIVO
     else:
-        _llama_inicio_time = None
+        # Las sinergias parciales pueden acumularse entre sí
+        if humo == 1 and temp_alta:
+            puntos += PUNTOS_SINERGIA_FUEGO_SIN_LLAMA
+        if llama == 1 and temp_alta:
+            puntos += PUNTOS_SINERGIA_LLAMA_CALIENTE
 
-    # 4. Regla Normal/Base: Temperatura > 27 -> Peligro 1
-    if temperatura > UMBRAL_TEMPERATURA_NIVEL_1:
-        return 1.0
+    # Sinergia de presencia en zona de riesgo (independiente de las anteriores)
+    if movimiento == 1 and (humo == 1 or llama == 1):
+        puntos += PUNTOS_SINERGIA_PRESENCIA_RIESGO
 
-    # Por defecto es Nivel 1 (Normal)
-    return 1.0
+    return round(puntos, 2)
 
 
 def _puntos_a_nivel(puntos: float) -> int:
-    """Como el 'puntos' ahora es el nivel directamente, solo retornamos el entero."""
-    return int(puntos)
+    """Mapea una puntuación cruda a un nivel de peligro del 1 al 5."""
+    for umbral, nivel in BANDAS_PELIGRO:
+        if puntos >= umbral:
+            return nivel
+    return 1  # Fallback de seguridad
 
 
 # ==============================================================================
@@ -184,7 +240,7 @@ def calcular_peligro_batch(df):
 
 def calcular_peligro_fila(fila: dict) -> int:
     """
-    Interfaz simple: recibe un dict y devuelve el nivel de peligro (int 1-3).
+    Interfaz simple: recibe un dict y devuelve solo el nivel de peligro (int 1-5).
     Útil para integrar en el pipeline de Procesos.py al recibir dato del Arduino.
     """
     puntos = _calcular_puntos(fila)
@@ -197,7 +253,7 @@ def calcular_peligro_fila(fila: dict) -> int:
 
 if __name__ == '__main__':
     print("=" * 55)
-    print("  DEMO — Motor de Peligro SLAK IoT (Reglas Directas)")
+    print("  DEMO — Motor de Peligro SLAK IoT (Factor ×1.7)")
     print("=" * 55)
 
     casos_prueba = [
@@ -238,4 +294,4 @@ if __name__ == '__main__':
             resultado = calcular_peligro_streaming(caso['dato'])
         
         print(f"\n📍 {caso['nombre']}")
-        print(f"   Score Final: {resultado['puntos']} → Nivel: {'⚠️ ' * resultado['nivel_peligro']} ({resultado['nivel_peligro']}/3)")
+        print(f"   Puntos: {resultado['puntos']:.2f}  →  Nivel de Peligro: {'⚠️ ' * resultado['nivel_peligro']} ({resultado['nivel_peligro']}/5)")
