@@ -50,10 +50,8 @@ PUNTOS_SINERGIA_PRESENCIA_RIESGO = 2.0  # Movimiento + (Humo o Llama) = Persona 
 # --- Bandas de puntuación → Nivel de peligro (1 a 5) ---
 # Cada tupla es (puntos_mínimos, nivel)
 BANDAS_PELIGRO = [
-    (15.0, 5),  # Peligro Crítico
-    (10.0, 4),  # Alerta Alta
-    (5.0,  3),  # Alerta Media
-    (2.0,  2),  # Alerta Baja
+    (10.0, 3),  # Peligro Crítico (antes 4 y 5)
+    (5.0,  2),  # Alerta (antes 2 y 3)
     (0.0,  1),  # Normal
 ]
 

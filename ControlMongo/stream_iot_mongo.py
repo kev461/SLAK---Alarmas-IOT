@@ -42,6 +42,13 @@ try:
 except ImportError:
     SERIAL_DISPONIBLE = False
 
+# Intentar importar socketio para la inyección directa al dashboard
+try:
+    import socketio
+    SIO_DISPONIBLE = True
+except ImportError:
+    SIO_DISPONIBLE = False
+
 # ==============================================================================
 # CONFIGURACIÓN DEL PUERTO SERIAL
 # Cambia estos valores según tu entorno
@@ -68,11 +75,9 @@ def conectar_mongo():
 # ==============================================================================
 
 ETIQUETAS_NIVEL = {
-    1: "NORMAL",
-    2: "ALERTA BAJA",
-    3: "ALERTA MEDIA",
-    4: "ALERTA ALTA",
-    5: "PELIGRO CRÍTICO",
+    1: "NORMAL",          # Antes Nivel 1 y 2
+    2: "ALERTA",          # Antes Nivel 3 y 4
+    3: "PELIGRO CRÍTICO", # Antes Nivel 5
 }
 
 def procesar_linea(linea_cruda: str, coleccion) -> dict:
@@ -115,11 +120,43 @@ def procesar_linea(linea_cruda: str, coleccion) -> dict:
 
     return documento
 
+def procesar_linea_dashboard(linea_cruda: str, sio_client=None) -> dict:
+    """
+    Procesa una línea del Arduino y la inyecta DIRECTAMENTE al Dashboard de Flask.
+    A diferencia de 'procesar_linea', esta función NO guarda en MongoDB para
+    evitar latencia o duplicidad, enfocándose solo en la visualización en vivo.
+    """
+    linea = linea_cruda.strip()
+    if not linea:
+        return None
+
+    # 1. Calcular peligro (normalización y motor x1.7)
+    resultado = calcular_peligro_streaming(linea)
+
+    # 2. Construir documento optimizado para JSON (SocketIO)
+    documento = {
+        **resultado['datos_sensor'],
+        'puntos_peligro':  resultado['puntos'],
+        'nivel_peligro':   resultado['nivel_peligro'],
+        'fecha_registro':  datetime.utcnow().isoformat(), # Formato string para compatibilidad JSON
+        'fuente':          'arduino_realtime',
+    }
+
+    # 3. Emitir evento al Dashboard de Flask (evento 'nuevo_dato' esperado por app.py)
+    if sio_client and sio_client.connected:
+        try:
+            sio_client.emit('nuevo_dato', documento)
+            print(f"[Dashboard] 🚀 Datos inyectados en tiempo real (Nivel {resultado['nivel_peligro']})")
+        except Exception as e:
+            print(f"[Dashboard] ❌ Error de inyección: {e}")
+    
+    return documento
+
 # ==============================================================================
 # MODO REAL: Lectura desde Arduino vía Serial
 # ==============================================================================
 
-def iniciar_streaming_serial(coleccion):
+def iniciar_streaming_serial(coleccion, sio_client=None):
     """
     Bucle de escucha real del Arduino.
     Lee líneas del puerto serial indefinidamente y las procesa.
@@ -142,7 +179,12 @@ def iniciar_streaming_serial(coleccion):
             if linea_bytes:
                 linea = linea_bytes.decode('utf-8', errors='replace').strip()
                 if linea:
+                    # FLUJO 1: Persistencia e Historial (MongoDB)
                     procesar_linea(linea, coleccion)
+                    
+                    # FLUJO 2: Visualización en Tiempo Real (Dashboard Flask)
+                    if sio_client:
+                        procesar_linea_dashboard(linea, sio_client)
     except KeyboardInterrupt:
         print("\n[Serial] Streaming detenido por el usuario.")
     finally:
@@ -163,17 +205,19 @@ DATOS_SIMULACION = [
     '1,1,1,78000,49.5,91.0',
 ]
 
-def iniciar_streaming_simulado(coleccion, intervalo_s: float = 2.0):
+def iniciar_streaming_simulado(coleccion, sio_client=None, intervalo_s: float = 2.0):
     """
     Simula un streaming del Arduino con datos de prueba.
     Útil para desarrollo y demos sin hardware físico.
     """
     print("[Simulación] Modo de prueba sin Arduino físico.")
-    print(f"[Simulación] Enviando {len(DATOS_SIMULACION)} lecturas con pausa de {intervalo_s}s.\n")
+    print(f"[Simulación] Enviando {len(DATOS_SIMULACION)} lecturas con pausa de {intervalo_s}s...")
+    if sio_client: print("[Simulación] Inyectando también al Dashboard.")
     try:
         for i, linea in enumerate(DATOS_SIMULACION):
-            print(f"[Simulación] Línea #{i+1} recibida: {linea[:60]}...")
             procesar_linea(linea, coleccion)
+            if sio_client:
+                procesar_linea_dashboard(linea, sio_client)
             time.sleep(intervalo_s)
         print("\n[Simulación] ✅ Todas las lecturas procesadas.")
     except KeyboardInterrupt:
@@ -188,6 +232,18 @@ if __name__ == '__main__':
     print("  SLAK IoT — Pipeline de Streaming Serial → MongoDB")
     print("=" * 55)
 
+    # Inicializar cliente de Sockets para el Dashboard
+    sio = None
+    if SIO_DISPONIBLE:
+        sio = socketio.Client()
+        try:
+            # Dirección del servidor Flask (ajusta si corre en otro host/puerto)
+            sio.connect('http://localhost:5000')
+            print("[SocketIO] ✅ Conectado al Dashboard de Flask.")
+        except Exception:
+            print("[SocketIO] ⚠️ No se pudo conectar al Dashboard. Los datos solo se guardarán en MongoDB.")
+            sio = None
+
     try:
         coleccion = conectar_mongo()
     except Exception as e:
@@ -196,5 +252,5 @@ if __name__ == '__main__':
 
     # Detectar si hay Arduino físico disponible
     # Para cambiar a modo real: cambia a iniciar_streaming_serial(coleccion)
-    #iniciar_streaming_simulado(coleccion, intervalo_s=1.0)
-    iniciar_streaming_serial(coleccion)
+    # iniciar_streaming_simulado(coleccion, sio_client=sio, intervalo_s=1.0)
+    iniciar_streaming_serial(coleccion, sio_client=sio)

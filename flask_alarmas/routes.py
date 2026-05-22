@@ -14,10 +14,9 @@ def registrar_rutas(app):
 
     @app.route("/monitor")
     def monitor():
-        # TODO: Aquí deberías leer el último dato directamente desde MongoDB
-        # Por ahora enviamos un diccionario vacío o datos de prueba
-        data = {"mensaje": "Conexión a base de datos pendiente"}
-        return render_template("monitor.html", data=data)
+        """Muestra la interfaz del monitor. 
+        El JavaScript en el navegador recibirá los datos vía SocketIO."""
+        return render_template("monitor.html", title='Monitor en Tiempo Real')
 
     @app.route('/administrar_correos', methods=['GET', 'POST'])
     def administrar_correos():
@@ -152,4 +151,3 @@ def registrar_rutas(app):
                 "estado": "error",
                 "mensaje": f"Ocurrió un error al consultar el histórico: {str(e)}"
             }), 500
-
