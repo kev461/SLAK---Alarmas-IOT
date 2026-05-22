@@ -97,6 +97,7 @@ def procesar_linea(linea_cruda: str, coleccion) -> dict:
     resultado = calcular_peligro_streaming(linea)
 
     # Construir documento enriquecido para MongoDB
+    # Construir documento enriquecido para MongoDB (Mismo formato original)
     documento = {
         **resultado['datos_sensor'],          # Todos los campos del sensor
         'puntos_peligro':  resultado['puntos'],
@@ -133,7 +134,7 @@ def procesar_linea_dashboard(linea_cruda: str, sio_client=None) -> dict:
     # 1. Calcular peligro (normalización y motor x1.7)
     resultado = calcular_peligro_streaming(linea)
 
-    # 2. Construir documento optimizado para JSON (SocketIO)
+    # Construir documento optimizado para JSON
     documento = {
         **resultado['datos_sensor'],
         'puntos_peligro':  resultado['puntos'],
