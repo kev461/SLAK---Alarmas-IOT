@@ -21,14 +21,14 @@ import json
 
 # Factor de susceptibilidad de laboratorio.
 # 1.7 = los sensores disparan con un 30% menos de margen del umbral normal.
-FACTOR_SUSCEPTIBILIDAD = 1.7
+FACTOR_SUSCEPTIBILIDAD = 1.8
 
 # --- Umbrales base de sensores individuales ---
 # (Condición de activación, puntos base ANTES de aplicar el factor)
 UMBRAL_TEMPERATURA_MEDIA  = 35   # °C: Ambiente caliente
 UMBRAL_TEMPERATURA_ALTA   = 45   # °C: Riesgo de quemaduras / incendio
 
-PUNTOS_HUMO               = 2.0  # pts: Presencia de humo es señal directa de riesgo
+PUNTOS_HUMO               = 3.0  # pts: Presencia de humo es señal directa de riesgo
 PUNTOS_LLAMA              = 2.0  # pts: Llama detectada
 PUNTOS_TEMP_MEDIA         = 1.5  # pts: Temperatura alta (primer umbral)
 PUNTOS_TEMP_ALTA          = 3.0  # pts: Temperatura muy alta (segundo umbral, reemplaza la media)
