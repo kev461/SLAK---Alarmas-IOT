@@ -19,20 +19,31 @@
                     <form method="POST" action="/administrar_correos">
                         <input type="hidden" name="action" value="add">
                         <div class="mb-4">
-                            <label for="Nombre" class="monitor-label" style="font-size: 0.65rem;">Nombre Completo</label>
-                            <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0 bg-transparent px-0" id="Nombre" name="Nombre" required style="border-bottom: 2px solid var(--marron-grafito);">
+                            <label for="Nombre" class="monitor-label" style="font-size: 0.65rem;">Nombre
+                                Completo</label>
+                            <input type="text"
+                                class="form-control rounded-0 border-top-0 border-start-0 border-end-0 bg-transparent px-0"
+                                id="Nombre" name="Nombre" required
+                                style="border-bottom: 2px solid var(--marron-grafito);">
                         </div>
                         <div class="mb-4">
-                            <label for="Correo" class="monitor-label" style="font-size: 0.65rem;">Correo Electrónico</label>
-                            <input type="email" class="form-control rounded-0 border-top-0 border-start-0 border-end-0 bg-transparent px-0" id="Correo" name="Correo" required style="border-bottom: 2px solid var(--marron-grafito);">
+                            <label for="Correo" class="monitor-label" style="font-size: 0.65rem;">Correo
+                                Electrónico</label>
+                            <input type="email"
+                                class="form-control rounded-0 border-top-0 border-start-0 border-end-0 bg-transparent px-0"
+                                id="Correo" name="Correo" required
+                                style="border-bottom: 2px solid var(--marron-grafito);">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100" style="background-color: var(--canela-suave) !important;">Registrar en el Sistema</button>
+                        <button type="submit" class="btn btn-primary w-100"
+                            style="background-color: var(--canela-suave) !important;">Registrar en el Sistema</button>
                     </form>
 
                     {% if resultado %}
-                        <div class="mt-4 p-3 border-start border-4" style="background-color: var(--blanco-niebla); border-color: var(--arena-nuez);">
-                            <small class="text-uppercase fw-bold" style="color: var(--marron-grafito);">{{ resultado }}</small>
-                        </div>
+                    <div class="mt-4 p-3 border-start border-4"
+                        style="background-color: var(--blanco-niebla); border-color: var(--arena-nuez);">
+                        <small class="text-uppercase fw-bold" style="color: var(--marron-grafito);">{{ resultado
+                            }}</small>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -42,7 +53,8 @@
                 <div class="monitor-card" style="border: 2px solid var(--ambar-oxido);">
                     <span class="monitor-label status-danger">Control Crítico</span>
                     <h3 class="mb-4 fw-light">Disparo Manual</h3>
-                    <p class="text-muted mb-5">Inicia el protocolo de notificación inmediata para todos los usuarios registrados. Esta acción enviará una alerta de seguridad a cada correo en la base de datos.</p>
+                    <p class="text-muted mb-5">Inicia el protocolo de notificación inmediata para todos los usuarios
+                        registrados. Esta acción enviará una alerta de seguridad a cada correo en la base de datos.</p>
                     <form method="POST" action="/administrar_correos">
                         <input type="hidden" name="action" value="send_emails">
                         <button type="submit" class="btn btn-primary w-100 py-3">Disparar Alertas de Seguridad</button>
@@ -60,9 +72,9 @@
                 <table class="table align-middle" style="background-color: var(--blanco-niebla);">
                     <thead>
                         <tr style="border-bottom: 2px solid var(--marron-grafito);">
-                            <th class="monitor-label py-3">Nombre</th>
-                            <th class="monitor-label py-3">Identificación Digital</th>
-                            <th class="monitor-label py-3 text-end">Acción</th>
+                            <th class="py-3"><span class="monitor-label">Nombre</span></th>
+                            <th class="py-3"><span class="monitor-label">Identificación Digital</span></th>
+                            <th class="py-3 text-end"><span class="monitor-label">Acción</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -74,7 +86,8 @@
                                 <form method="POST" action="/administrar_correos" style="display:inline;">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="correo_a_eliminar" value="{{ row['Correo'] }}">
-                                    <button type="submit" class="btn btn-sm btn-link text-decoration-none status-danger fw-bold p-0">ELIMINAR</button>
+                                    <button type="submit"
+                                        class="btn btn-sm btn-link text-decoration-none status-danger fw-bold p-0">ELIMINAR</button>
                                 </form>
                             </td>
                         </tr>
