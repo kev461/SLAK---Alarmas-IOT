@@ -8,17 +8,21 @@
 <style>
   /* ---- Variables extra para peligro ---- */
   :root {
-    --peligro-1: #C1AA8D;          /* arena-nuez — Normal           */
-    --peligro-2: #B15636;          /* ambar-oxido — Alerta          */
-    --peligro-3: #8B0000;          /* rojo oscuro — Peligro Crítico */
+    --peligro-1: #C1AA8D;
+    /* arena-nuez — Normal           */
+    --peligro-2: #B15636;
+    /* ambar-oxido — Alerta          */
+    --peligro-3: #8B0000;
+    /* rojo oscuro — Peligro Crítico */
     --peligro-text: var(--blanco-niebla);
-    --conectado: #28a745;          /* Verde para estado en línea */
+    --conectado: #28a745;
+    /* Verde para estado en línea */
   }
 
   /* ---- Hero header ---- */
   .monitor-header {
     padding: 4rem 0 3rem;
-    border-bottom: 1px solid rgba(193,170,141,0.25);
+    border-bottom: 1px solid rgba(193, 170, 141, 0.25);
     margin-bottom: 2.5rem;
   }
 
@@ -33,9 +37,17 @@
     justify-content: space-between;
     min-height: 160px;
   }
+
   /* Animación para nivel 3 */
-  @keyframes blink-alert { 50% { opacity: 0.8; } }
-  .peligro-3-anim { animation: blink-alert 1s infinite; }
+  @keyframes blink-alert {
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .peligro-3-anim {
+    animation: blink-alert 1s infinite;
+  }
 
   .peligro-nivel-num {
     font-size: 5rem;
@@ -43,6 +55,7 @@
     line-height: 1;
     letter-spacing: -0.04em;
   }
+
   .peligro-label-top {
     text-transform: uppercase;
     font-size: 0.7rem;
@@ -50,42 +63,52 @@
     letter-spacing: 0.18em;
     opacity: 0.75;
   }
+
   .peligro-desc {
     font-size: 0.85rem;
     font-weight: 400;
     opacity: 0.9;
     margin-top: 0.4rem;
   }
+
   .peligro-dots {
     display: flex;
     gap: 6px;
     margin-top: 1rem;
   }
+
   .peligro-dot {
-    width: 10px; height: 10px;
+    width: 10px;
+    height: 10px;
     border-radius: 0;
-    background: rgba(255,255,255,0.25);
+    background: rgba(255, 255, 255, 0.25);
     transition: background 0.4s;
   }
-  .peligro-dot.activo { background: rgba(255,255,255,0.9); }
+
+  .peligro-dot.activo {
+    background: rgba(255, 255, 255, 0.9);
+  }
 
   /* ---- Tarjeta sensor principal ---- */
   .sensor-card {
     background: var(--blanco-niebla);
     padding: 2rem 2rem 1.5rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
   }
+
   .sensor-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
   }
+
   .sensor-icon {
     font-size: 1.4rem;
     margin-bottom: 0.5rem;
     opacity: 0.6;
   }
+
   .sensor-value {
     font-size: 2.6rem;
     font-weight: 300;
@@ -93,6 +116,7 @@
     line-height: 1.1;
     margin: 0.3rem 0 0.4rem;
   }
+
   .sensor-unit {
     font-size: 0.7rem;
     text-transform: uppercase;
@@ -108,29 +132,39 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     transition: all 0.35s ease;
     height: 100%;
   }
+
   .binary-card.alerta {
     background: var(--ambar-oxido);
     color: var(--blanco-niebla);
   }
+
   .binary-card.alerta .sensor-unit,
-  .binary-card.alerta .monitor-label { color: rgba(235,239,238,0.75) !important; }
+  .binary-card.alerta .monitor-label {
+    color: rgba(235, 239, 238, 0.75) !important;
+  }
+
   .binary-indicator {
-    width: 14px; height: 14px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: var(--arena-nuez);
     flex-shrink: 0;
     transition: background 0.3s;
   }
-  .binary-card.alerta .binary-indicator { background: var(--blanco-niebla); box-shadow: 0 0 8px rgba(255,255,255,0.7); }
+
+  .binary-card.alerta .binary-indicator {
+    background: var(--blanco-niebla);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+  }
 
   /* ---- Divider ---- */
   .section-divider {
     border: none;
-    border-top: 1px solid rgba(193,170,141,0.2);
+    border-top: 1px solid rgba(193, 170, 141, 0.2);
     margin: 2.5rem 0;
   }
 
@@ -153,7 +187,11 @@
     padding: 0.85rem 1rem !important;
     white-space: nowrap;
   }
-  .tabla-td { padding: 0.75rem 1rem !important; }
+
+  .tabla-td {
+    padding: 0.75rem 1rem !important;
+  }
+
   .nivel-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -177,11 +215,13 @@
       </div>
       <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <span class="monitor-label d-block mb-1">Fuente de datos</span>
-        <span class="badge rounded-0 px-3 py-2" style="background:var(--marron-grafito); color:var(--blanco-niebla); font-size:0.75rem; letter-spacing:0.1em;">
+        <span class="badge rounded-0 px-3 py-2"
+          style="background:var(--marron-grafito); color:var(--blanco-niebla); font-size:0.75rem; letter-spacing:0.1em;">
           MONGODB ATLAS
         </span>
         &nbsp;
-        <span id="status-dot" class="badge rounded-0 px-3 py-2" style="background:var(--arena-nuez); color:var(--blanco-niebla); font-size:0.75rem;">
+        <span id="status-dot" class="badge rounded-0 px-3 py-2"
+          style="background:var(--arena-nuez); color:var(--blanco-niebla); font-size:0.75rem;">
           OFFLINE
         </span>
       </div>
@@ -205,7 +245,8 @@
             <div class="peligro-dot" id="dot-2"></div>
             <div class="peligro-dot" id="dot-3"></div>
           </div>
-          <div style="font-size:0.7rem; opacity:0.65; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.1em;">
+          <div
+            style="font-size:0.7rem; opacity:0.65; margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.1em;">
             Puntos: <span id="peligro-pts">—</span>
           </div>
         </div>
@@ -292,9 +333,12 @@
     </div>
     <div class="col-md-6 text-md-end mt-2 mt-md-0 pt-md-2">
       <div class="btn-group" role="group">
-        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0 active" onclick="cargarHistorico('24h', this)">Últ. 24 h</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" onclick="cargarHistorico('7d', this)">7 días</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" onclick="cargarHistorico('30d', this)">30 días</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0 active"
+          onclick="cargarHistorico('24h', this)">Últ. 24 h</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" onclick="cargarHistorico('7d', this)">7
+          días</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0"
+          onclick="cargarHistorico('30d', this)">30 días</button>
       </div>
     </div>
   </div>
@@ -315,7 +359,9 @@
           </tr>
         </thead>
         <tbody id="tablaHistoricoBody">
-          <tr><td colspan="8" class="text-center text-muted py-4">Cargando…</td></tr>
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">Cargando…</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -326,166 +372,166 @@
 <!-- Socket.IO Cliente -->
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-// ================================================================
-// CONFIGURACIÓN
-// ================================================================
-const ETIQUETAS_PELIGRO = {
-  1: { texto: 'Normal',         color: 'var(--peligro-1)' },
-  2: { texto: 'Alerta',         color: 'var(--peligro-2)' },
-  3: { texto: 'PELIGRO CRÍTICO',color: 'var(--peligro-3)' },
-};
+  // ================================================================
+  // CONFIGURACIÓN
+  // ================================================================
+  const ETIQUETAS_PELIGRO = {
+    1: { texto: 'Normal', color: 'var(--peligro-1)' },
+    2: { texto: 'Alerta', color: 'var(--peligro-2)' },
+    3: { texto: 'PELIGRO CRÍTICO', color: 'var(--peligro-3)' },
+  };
 
-// ================================================================
-// ACTUALIZAR PANEL DE ÚLTIMO REGISTRO
-// ================================================================
-function actualizarPanelUltimo(d) {
-  // Fecha
-  const fecha = new Date(d.fecha_registro);
-  document.getElementById('ultima-fecha').textContent =
-    fecha.toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  // ================================================================
+  // ACTUALIZAR PANEL DE ÚLTIMO REGISTRO
+  // ================================================================
+  function actualizarPanelUltimo(d) {
+    // Fecha
+    const fecha = new Date(d.fecha_registro);
+    document.getElementById('ultima-fecha').textContent =
+      fecha.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  // Valores analógicos
-  document.getElementById('val-temperatura').textContent =
-    (d.temperatura != null) ? d.temperatura.toFixed(1) + ' °C' : '--';
-  document.getElementById('val-humedad').textContent =
-    (d.humedad != null) ? d.humedad.toFixed(1) + ' %' : '--';
-  document.getElementById('val-luz').textContent =
-    (d.luz != null) ? Number(d.luz).toLocaleString() : '--';
+    // Valores analógicos
+    document.getElementById('val-temperatura').textContent =
+      (d.temperatura != null) ? d.temperatura.toFixed(1) + ' °C' : '--';
+    document.getElementById('val-humedad').textContent =
+      (d.humedad != null) ? d.humedad.toFixed(1) + ' %' : '--';
+    document.getElementById('val-luz').textContent =
+      (d.luz != null) ? Number(d.luz).toLocaleString() : '--';
 
-  // Binarios
-  actualizarBinario('humo',       d.humo,       'Detectado', 'Ausente');
-  actualizarBinario('llama',      d.llama,      'Detectada', 'Ausente');
-  actualizarBinario('movimiento', d.movimiento, 'Detectado', 'Sin movimiento');
+    // Binarios
+    actualizarBinario('humo', d.humo, 'Detectado', 'Ausente');
+    actualizarBinario('llama', d.llama, 'Detectada', 'Ausente');
+    actualizarBinario('movimiento', d.movimiento, 'Detectado', 'Sin movimiento');
 
-  // Nivel de peligro
-  const nivel = d.nivel_peligro || 1;
-  actualizarPeligro(nivel, d.puntos_peligro);
-}
-
-function actualizarBinario(sensor, valor, textoActivo, textoInactivo) {
-  const card = document.getElementById('card-' + sensor);
-  const ind  = document.getElementById('ind-' + sensor);
-  const val  = document.getElementById('val-' + sensor);
-  const activo = (valor === 1 || valor === true);
-
-  card.classList.toggle('alerta', activo);
-  val.textContent = activo ? textoActivo : textoInactivo;
-}
-
-function actualizarPeligro(nivel, puntos) {
-  const info = ETIQUETAS_PELIGRO[nivel] || ETIQUETAS_PELIGRO[1];
-  const card = document.getElementById('peligro-card');
-
-  card.style.backgroundColor = info.color;
-  document.getElementById('peligro-num').textContent  = nivel;
-  document.getElementById('peligro-desc').textContent = info.texto;
-  document.getElementById('peligro-pts').textContent  = (puntos != null) ? puntos.toFixed(1) : '—';
-
-  // Animación si es nivel crítico
-  if (nivel === 3) card.classList.add('peligro-3-anim');
-  else card.classList.remove('peligro-3-anim');
-
-  // Dots
-  for (let i = 1; i <= 3; i++) {
-    document.getElementById('dot-' + i).classList.toggle('activo', i <= nivel);
+    // Nivel de peligro
+    const nivel = d.nivel_peligro || 1;
+    actualizarPeligro(nivel, d.puntos_peligro);
   }
-}
 
-// ================================================================
-// FETCH: ÚLTIMO REGISTRO (al cargar y cada 30 s)
-// ================================================================
-function fetchUltimo() {
-  fetch('/api/ultimo')
-    .then(r => r.json())
-    .then(res => {
-      if (res.estado === 'exitoso' && res.datos) {
-        actualizarPanelUltimo(res.datos);
-      }
-    })
-    .catch(err => console.warn('fetchUltimo error:', err));
-}
+  function actualizarBinario(sensor, valor, textoActivo, textoInactivo) {
+    const card = document.getElementById('card-' + sensor);
+    const ind = document.getElementById('ind-' + sensor);
+    const val = document.getElementById('val-' + sensor);
+    const activo = (valor === 1 || valor === true);
 
-// ================================================================
-// SOCKET: Actualizaciones en tiempo real del hardware (Arduino)
-// Cuando llegue un dato de socket, también actualizamos el panel
-// ================================================================
+    card.classList.toggle('alerta', activo);
+    val.textContent = activo ? textoActivo : textoInactivo;
+  }
 
-const socket = io(); // Conexión automática al servidor Flask
+  function actualizarPeligro(nivel, puntos) {
+    const info = ETIQUETAS_PELIGRO[nivel] || ETIQUETAS_PELIGRO[1];
+    const card = document.getElementById('peligro-card');
 
-// Escuchamos el evento que emite app.py (actualizar_dashboard)
-socket.on('actualizar_dashboard', function(data) {
+    card.style.backgroundColor = info.color;
+    document.getElementById('peligro-num').textContent = nivel;
+    document.getElementById('peligro-desc').textContent = info.texto;
+    document.getElementById('peligro-pts').textContent = (puntos != null) ? puntos.toFixed(1) : '—';
+
+    // Animación si es nivel crítico
+    if (nivel === 3) card.classList.add('peligro-3-anim');
+    else card.classList.remove('peligro-3-anim');
+
+    // Dots
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById('dot-' + i).classList.toggle('activo', i <= nivel);
+    }
+  }
+
+  // ================================================================
+  // FETCH: ÚLTIMO REGISTRO (al cargar y cada 30 s)
+  // ================================================================
+  function fetchUltimo() {
+    fetch('/api/ultimo')
+      .then(r => r.json())
+      .then(res => {
+        if (res.estado === 'exitoso' && res.datos) {
+          actualizarPanelUltimo(res.datos);
+        }
+      })
+      .catch(err => console.warn('fetchUltimo error:', err));
+  }
+
+  // ================================================================
+  // SOCKET: Actualizaciones en tiempo real del hardware (Arduino)
+  // Cuando llegue un dato de socket, también actualizamos el panel
+  // ================================================================
+
+  const socket = io(); // Conexión automática al servidor Flask
+
+  // Escuchamos el evento que emite app.py (actualizar_dashboard)
+  socket.on('actualizar_dashboard', function (data) {
     console.log("Inyección recibida:", data);
     // El objeto 'data' ya viene con el formato enriquecido de stream_iot_mongo.py
     actualizarPanelUltimo(data);
-});
-// ================================================================
-// TABLA HISTÓRICA
-// ================================================================
-const COLORES_NIVEL = {
-  1: 'var(--peligro-1)',
-  2: 'var(--peligro-2)',
-  3: 'var(--peligro-3)',
-};
+  });
+  // ================================================================
+  // TABLA HISTÓRICA
+  // ================================================================
+  const COLORES_NIVEL = {
+    1: 'var(--peligro-1)',
+    2: 'var(--peligro-2)',
+    3: 'var(--peligro-3)',
+  };
 
-function badge(activo, textoSi, textoNo, colorSi) {
-  if (activo === 1) {
-    return `<span class="badge rounded-0 py-1 px-2 fw-medium" style="background:${colorSi}; color:var(--blanco-niebla); font-size:0.7rem;">${textoSi}</span>`;
-  }
-  return `<span class="badge rounded-0 py-1 px-2 fw-light" style="background:transparent; border:1px solid var(--arena-nuez); color:var(--arena-nuez); font-size:0.7rem;">${textoNo}</span>`;
-}
-
-function cargarHistorico(rango, btnElement) {
-  if (btnElement) {
-    btnElement.parentElement.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-    btnElement.classList.add('active');
+  function badge(activo, textoSi, textoNo, colorSi) {
+    if (activo === 1) {
+      return `<span class="badge rounded-0 py-1 px-2 fw-medium" style="background:${colorSi}; color:var(--blanco-niebla); font-size:0.7rem;">${textoSi}</span>`;
+    }
+    return `<span class="badge rounded-0 py-1 px-2 fw-light" style="background:transparent; border:1px solid var(--arena-nuez); color:var(--arena-nuez); font-size:0.7rem;">${textoNo}</span>`;
   }
 
-  const tbody = document.getElementById('tablaHistoricoBody');
-  tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Cargando…</td></tr>';
+  function cargarHistorico(rango, btnElement) {
+    if (btnElement) {
+      btnElement.parentElement.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+    }
 
-  fetch(`/api/historico?rango=${rango}`)
-    .then(r => r.json())
-    .then(res => {
-      tbody.innerHTML = '';
+    const tbody = document.getElementById('tablaHistoricoBody');
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Cargando…</td></tr>';
 
-      if (res.estado !== 'exitoso' || res.datos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Sin registros en este rango.</td></tr>';
-        return;
-      }
+    fetch(`/api/historico?rango=${rango}`)
+      .then(r => r.json())
+      .then(res => {
+        tbody.innerHTML = '';
 
-      [...res.datos].reverse().forEach(d => {
-        const fecha = new Date(d.fecha_registro)
-          .toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        if (res.estado !== 'exitoso' || res.datos.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Sin registros en este rango.</td></tr>';
+          return;
+        }
 
-        const nivel = d.nivel_peligro || 1;
-        const colorNivel = COLORES_NIVEL[nivel] || 'var(--arena-nuez)';
-        const nivelBadge = `<span class="nivel-badge" style="background:${colorNivel};">${nivel}/3</span>`;
+        [...res.datos].reverse().forEach(d => {
+          const fecha = new Date(d.fecha_registro)
+            .toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-        tbody.insertAdjacentHTML('beforeend', `
+          const nivel = d.nivel_peligro || 1;
+          const colorNivel = COLORES_NIVEL[nivel] || 'var(--arena-nuez)';
+          const nivelBadge = `<span class="nivel-badge" style="background:${colorNivel};">${nivel}/3</span>`;
+
+          tbody.insertAdjacentHTML('beforeend', `
           <tr>
             <td class="tabla-td small text-muted fw-semibold" style="white-space:nowrap;">${fecha}</td>
             <td class="tabla-td">${(d.temperatura ?? '--').toFixed ? d.temperatura.toFixed(1) + ' °C' : '--'}</td>
             <td class="tabla-td">${(d.humedad ?? '--').toFixed ? d.humedad.toFixed(1) + ' %' : '--'}</td>
             <td class="tabla-td font-monospace text-secondary">${Number(d.luz || 0).toLocaleString()}</td>
-            <td class="tabla-td text-center">${badge(d.humo,       'SÍ', 'NO', 'var(--ambar-oxido)')}</td>
-            <td class="tabla-td text-center">${badge(d.llama,      'SÍ', 'NO', 'var(--ambar-oxido)')}</td>
+            <td class="tabla-td text-center">${badge(d.humo, 'SÍ', 'NO', 'var(--ambar-oxido)')}</td>
+            <td class="tabla-td text-center">${badge(d.llama, 'SÍ', 'NO', 'var(--ambar-oxido)')}</td>
             <td class="tabla-td text-center">${badge(d.movimiento, 'SÍ', 'NO', 'var(--canela-suave)')}</td>
             <td class="tabla-td text-center">${nivelBadge}</td>
           </tr>`);
+        });
+      })
+      .catch(() => {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Error de conexión con la base de datos.</td></tr>';
       });
-    })
-    .catch(() => {
-      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Error de conexión con la base de datos.</td></tr>';
-    });
-}
+  }
 
-// ================================================================
-// INICIALIZACIÓN
-// ================================================================
-document.addEventListener('DOMContentLoaded', () => {
-  fetchUltimo();
-  setInterval(fetchUltimo, 30000);   // Refrescar último registro cada 30 s
-  cargarHistorico('24h');
-});
+  // ================================================================
+  // INICIALIZACIÓN
+  // ================================================================
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchUltimo();
+    setInterval(fetchUltimo, 30000);   // Refrescar último registro cada 30 s
+    cargarHistorico('24h');
+  });
 </script>
 {% endblock %}

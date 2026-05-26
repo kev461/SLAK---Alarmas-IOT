@@ -135,6 +135,13 @@ def registrar_rutas(app):
             # Excluimos '_id' para evitar problemas de serialización de ObjectId en JSON
             registros = list(coleccion.find(query, {"_id": 0}).sort("fecha_registro", 1))
             
+            # Obtener usuarios del Excel
+            df_usuarios = Crear_Excel.obtener_df_correos()
+            usuarios = []
+            if not df_usuarios.empty and 'Nombre' in df_usuarios.columns and 'Correo' in df_usuarios.columns:
+                # Retornamos una lista de diccionarios con 'Nombre' y 'Correo'
+                usuarios = df_usuarios[['Nombre', 'Correo']].to_dict('records')
+            
             return jsonify({
                 "estado": "exitoso",
                 "rango_aplicado": {
@@ -143,7 +150,8 @@ def registrar_rutas(app):
                     "fin": fin_dt.isoformat() + "Z",
                     "total_registros": len(registros)
                 },
-                "datos": registros
+                "datos": registros,
+                "Usuarios": usuarios
             }), 200
             
         except Exception as e:
