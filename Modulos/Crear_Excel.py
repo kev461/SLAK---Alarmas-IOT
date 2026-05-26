@@ -1,8 +1,9 @@
 import pandas as pd
+import logging
 from pathlib import Path
 
 # Definimos la ruta de forma global para que otros módulos la usen
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parents[1]
 RUTA_EXCEL_CORREOS = BASE_DIR / 'uploads' / 'Correos.xlsx'
 
 def obtener_df_correos():
@@ -15,7 +16,7 @@ def obtener_df_correos():
     return df_nuevo
 
 def guardar_df_correos(df: pd.DataFrame):
-    """Asegura que la carpeta exista y guarda el DataFrame en el Excel."""
+    """Asegura que la carpeta exista y guarda el DataFrame en el Excel usando openpyxl."""
     RUTA_EXCEL_CORREOS.parent.mkdir(parents=True, exist_ok=True)
-    df.to_excel(RUTA_EXCEL_CORREOS, index=False)
+    df.to_excel(RUTA_EXCEL_CORREOS, index=False, engine='openpyxl')
     return 'La carpeta existe y el DataFrame se ha guardado correctamente.'
