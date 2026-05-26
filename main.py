@@ -12,6 +12,43 @@ except ImportError:
     socketio = None # Para evitar errores si no está instalado
 
 # ======================================================
+# INTERCEPTOR DE ALERTAS (Wrapper de MongoDB)
+# ======================================================
+class ColeccionWrapper:
+    def __init__(self, original_coleccion):
+        self._original = original_coleccion
+
+    def __getattr__(self, name):
+        return getattr(self._original, name)
+
+    def insert_one(self, document, *args, **kwargs):
+        # 1. Ejecutar inserción en base de datos
+        resultado = self._original.insert_one(document, *args, **kwargs)
+        
+        # 2. Interceptar nivel de peligro
+        nivel = document.get('nivel_peligro')
+        if nivel is not None:
+            # Alertas de Correo (Nivel 2 y 3)
+            if nivel in [2, 3]:
+                try:
+                    from Modulos.SMTP import enviar_alerta_peligro
+                    print(f"[Alertas] [Correo] Disparando alertas por correo para peligro nivel {nivel}...")
+                    enviar_alerta_peligro(nivel_peligro=nivel)
+                except Exception as e:
+                    print(f"[Alertas] [Error] Error al enviar correos: {e}")
+            
+            # Alertas de Twilio (Nivel 3 únicamente)
+            if nivel == 3:
+                try:
+                    from Modulos.twilio_alerta import enviar_alerta_twilio
+                    print(f"[Alertas] [Twilio] Disparando alertas por Twilio para peligro nivel {nivel}...")
+                    enviar_alerta_twilio(nivel_peligro=nivel)
+                except Exception as e:
+                    print(f"[Alertas] [Error] Error al enviar Twilio SMS: {e}")
+                    
+        return resultado
+
+# ======================================================
 # MOTOR DE DATOS (SERIAL -> PROCESOS -> MONGO)
 # ======================================================
 if __name__ == '__main__':
@@ -31,6 +68,8 @@ if __name__ == '__main__':
 
     try:
         coleccion = conectar_mongo()
+        # Envolvemos la colección para interceptar las alertas sin modificar stream_iot_mongo.py
+        coleccion = ColeccionWrapper(coleccion)
     except Exception as e:
         print(f"[ERROR] No se pudo conectar a MongoDB: {e}")
         sys.exit(1)
