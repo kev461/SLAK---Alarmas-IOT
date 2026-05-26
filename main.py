@@ -1,4 +1,5 @@
 import sys
+import time
 from pathlib import Path
 
 # Configuración de rutas para encontrar los módulos
@@ -17,6 +18,8 @@ except ImportError:
 class ColeccionWrapper:
     def __init__(self, original_coleccion):
         self._original = original_coleccion
+        self._ultimo_nivel_alerta = 0
+        self._ultimo_tiempo_mensaje = 0.0
 
     def __getattr__(self, name):
         return getattr(self._original, name)
@@ -28,23 +31,35 @@ class ColeccionWrapper:
         # 2. Interceptar nivel de peligro
         nivel = document.get('nivel_peligro')
         if nivel is not None:
-            # Alertas de Correo (Nivel 2 y 3)
-            if nivel in [2, 3]:
-                try:
-                    from Modulos.SMTP import enviar_alerta_peligro
-                    print(f"[Alertas] [Correo] Disparando alertas por correo para peligro nivel {nivel}...")
-                    enviar_alerta_peligro(nivel_peligro=nivel)
-                except Exception as e:
-                    print(f"[Alertas] [Error] Error al enviar correos: {e}")
+            ahora = time.time()
+            cooldown_pasado = (ahora - self._ultimo_tiempo_mensaje) >= 60  # 5 minutos = 300 segundos
+            ha_subido_peligro = (self._ultimo_nivel_alerta is None) or (nivel > self._ultimo_nivel_alerta)
             
-            # Alertas de Twilio (Nivel 3 únicamente)
-            if nivel == 3:
-                try:
-                    from Modulos.twilio_alerta import enviar_alerta_twilio
-                    print(f"[Alertas] [Twilio] Disparando alertas por Twilio para peligro nivel {nivel}...")
-                    enviar_alerta_twilio(nivel_peligro=nivel)
-                except Exception as e:
-                    print(f"[Alertas] [Error] Error al enviar Twilio SMS: {e}")
+            # Solo intentamos notificar si el nivel actual es de alerta (2 o 3)
+            if nivel in [2, 3]:
+                if cooldown_pasado or ha_subido_peligro:
+                    # Registrar el momento y nivel del mensaje enviado
+                    self._ultimo_tiempo_mensaje = ahora
+                    self._ultimo_nivel_alerta = nivel
+                    
+                    # Alertas de Correo (Nivel 2 y 3)
+                    try:
+                        from Modulos.SMTP import enviar_alerta_peligro
+                        print(f"[Alertas] [Correo] Disparando alertas por correo para peligro nivel {nivel} (Razón: Cooldown pasado={cooldown_pasado}, Subió nivel={ha_subido_peligro})...")
+                        enviar_alerta_peligro(nivel_peligro=nivel)
+                    except Exception as e:
+                        print(f"[Alertas] [Error] Error al enviar correos: {e}")
+                    
+                    # Alertas de Twilio (Nivel 3 únicamente)
+                    if nivel == 3:
+                        try:
+                            from Modulos.twilio_alerta import enviar_alerta_twilio
+                            print(f"[Alertas] [Twilio] Disparando alertas por Twilio para peligro nivel {nivel}...")
+                            enviar_alerta_twilio(nivel_peligro=nivel)
+                        except Exception as e:
+                            print(f"[Alertas] [Error] Error al enviar Twilio SMS: {e}")
+                else:
+                    print(f"[Alertas] [Bloqueado] Alerta omitida por cooldown. Nivel actual: {nivel}, Último enviado: Nivel {self._ultimo_nivel_alerta} hace {ahora - self._ultimo_tiempo_mensaje:.1f}s")
                     
         return resultado
 
