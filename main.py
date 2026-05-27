@@ -1,10 +1,14 @@
 import sys
 import time
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Configuración de rutas para encontrar los módulos
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR))
+
+# Cargar variables de entorno globalmente para los módulos SMTP y Twilio
+load_dotenv(BASE_DIR / '.env')
 
 from ControlMongo.stream_iot_mongo import iniciar_streaming_serial, conectar_mongo, SIO_DISPONIBLE
 try:
@@ -31,16 +35,18 @@ class ColeccionWrapper:
         # 2. Interceptar nivel de peligro
         nivel = document.get('nivel_peligro')
         if nivel is not None:
+            nivel = int(nivel) # Asegurar comparación numérica
             ahora = time.time()
-            cooldown_pasado = (ahora - self._ultimo_tiempo_mensaje) >= 60  # 5 minutos = 300 segundos
-            ha_subido_peligro = (self._ultimo_nivel_alerta is None) or (nivel > self._ultimo_nivel_alerta)
+            cooldown_pasado = (ahora - self._ultimo_tiempo_mensaje) >= 60 
+            
+            # Si el peligro aumenta (ej. de 2 a 3 o de 1 a 2), ignoramos el cooldown para alertar rápido
+            ha_subido_peligro = (nivel > self._ultimo_nivel_alerta)
             
             # Solo intentamos notificar si el nivel actual es de alerta (2 o 3)
             if nivel in [2, 3]:
                 if cooldown_pasado or ha_subido_peligro:
                     # Registrar el momento y nivel del mensaje enviado
                     self._ultimo_tiempo_mensaje = ahora
-                    self._ultimo_nivel_alerta = nivel
                     
                     # Alertas de Correo (Nivel 2 y 3)
                     try:
@@ -59,8 +65,11 @@ class ColeccionWrapper:
                         except Exception as e:
                             print(f"[Alertas] [Error] Error al enviar Twilio SMS: {e}")
                 else:
-                    print(f"[Alertas] [Bloqueado] Alerta omitida por cooldown. Nivel actual: {nivel}, Último enviado: Nivel {self._ultimo_nivel_alerta} hace {ahora - self._ultimo_tiempo_mensaje:.1f}s")
-                    
+                    print(f"[Alertas] [Bloqueado] Nivel {nivel} omitido (Cooldown activo y nivel no ha subido).")
+            
+            # Actualizar siempre el historial del nivel, aunque no se envíe alerta (crucial para detectar subidas)
+            self._ultimo_nivel_alerta = nivel
+            
         return resultado
 
 # ======================================================
