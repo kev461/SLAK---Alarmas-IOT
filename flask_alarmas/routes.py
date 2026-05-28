@@ -159,3 +159,91 @@ def registrar_rutas(app):
                 "estado": "error",
                 "mensaje": f"Ocurrió un error al consultar el histórico: {str(e)}"
             }), 500
+
+    @app.route('/api/solo_historico', methods=['GET'])
+    def api_solo_historico():
+        """Retorna únicamente el histórico de datos de MongoDB filtrado por rango."""
+        try:
+            mongo_uri = os.getenv('IOT_MONGO_URI')
+            mongo_db = os.getenv('IOT_MONGO_DB')
+            mongo_col = os.getenv('IOT_MONGO_COLECCION')
+            
+            if not mongo_uri or not mongo_db or not mongo_col:
+                return jsonify({"estado": "error", "mensaje": "Configuración de Mongo incompleta."}), 500
+                
+            client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
+            coleccion = client[mongo_db][mongo_col]
+            
+            # Asegurar índice para optimizar la consulta
+            coleccion.create_index([("fecha_registro", -1)])
+            
+            rango = request.args.get('rango', '24h')
+            inicio = request.args.get('inicio')
+            fin = request.args.get('fin')
+            ahora = datetime.utcnow()
+            
+            if inicio:
+                try:
+                    inicio_dt = datetime.strptime(inicio, "%Y-%m-%d")
+                    if fin:
+                        fin_dt = datetime.strptime(fin, "%Y-%m-%d") + timedelta(days=1) - timedelta(seconds=1)
+                    else:
+                        fin_dt = ahora
+                except ValueError:
+                    return jsonify({"estado": "error", "mensaje": "Formato de fecha inválido (YYYY-MM-DD)."}), 400
+            else:
+                if rango == '24h':
+                    inicio_dt = ahora - timedelta(hours=24)
+                elif rango == '7d':
+                    inicio_dt = ahora - timedelta(days=7)
+                elif rango == '30d':
+                    inicio_dt = ahora - timedelta(days=30)
+                else:
+                    inicio_dt = ahora - timedelta(hours=24)
+                fin_dt = ahora
+                
+            query = {"fecha_registro": {"$gte": inicio_dt, "$lte": fin_dt}}
+            registros = list(coleccion.find(query, {"_id": 0}).sort("fecha_registro", 1))
+            
+            return jsonify({
+                "estado": "exitoso",
+                "rango_aplicado": {
+                    "inicio": inicio_dt.isoformat() + "Z",
+                    "fin": fin_dt.isoformat() + "Z",
+                    "total": len(registros)
+                },
+                "datos": registros
+            }), 200
+            
+        except Exception as e:
+            return jsonify({
+                "estado": "error",
+                "mensaje": f"Error al obtener histórico: {str(e)}"
+            }), 500
+
+    @app.route('/api/usuarios', methods=['GET'])
+    def api_usuarios():
+        """Retorna únicamente la lista de usuarios registrados en el Excel."""
+        try:
+            df_usuarios = Crear_Excel.obtener_df_correos()
+            usuarios = []
+            
+            if not df_usuarios.empty:
+                # Verificar que las columnas existan antes de filtrar
+                columnas_requeridas = ['Nombre', 'Correo']
+                if all(col in df_usuarios.columns for col in columnas_requeridas):
+                    usuarios = df_usuarios[columnas_requeridas].to_dict('records')
+                else:
+                    usuarios = df_usuarios.to_dict('records')
+            
+            return jsonify({
+                "estado": "exitoso",
+                "total_usuarios": len(usuarios),
+                "usuarios": usuarios
+            }), 200
+            
+        except Exception as e:
+            return jsonify({
+                "estado": "error",
+                "mensaje": f"Error al obtener usuarios: {str(e)}"
+            }), 500
