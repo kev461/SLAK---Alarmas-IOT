@@ -4,9 +4,10 @@ Descripción: Pipeline de Streaming IoT — Arduino → Python → MongoDB Atlas
 
 Flujo:
   1. Leer una línea/JSON crudo que llega del Arduino por Serial (o simular)
-  2. Calcular el nivel de peligro (1-5) con el motor de Calcular_peligro
-  3. Guardar el registro enriquecido en MongoDB Atlas
-  4. Repetir indefinidamente (bucle de escucha)
+  2. Calcular el nivel de peligro (1-3) con el motor de Calcular_peligro
+  3. Envía los datos de peligro al Arduino por Serial
+  4. Guardar el registro enriquecido en MongoDB Atlas
+  5. Repetir indefinidamente (bucle de escucha)
 
 Formatos de entrada tolerados del Arduino:
   - JSON:    {"temperatura": 36.5, "humo": 1, "llama": 0, "movimiento": 1, "luz": 3000, "humedad": 72.5}
@@ -53,7 +54,8 @@ except ImportError:
 # CONFIGURACIÓN DEL PUERTO SERIAL
 # Cambia estos valores según tu entorno
 # ==============================================================================
-PUERTO_SERIAL = '/dev/rfcomm0'  # Linux. En Windows sería 'COM3', 'COM4', etc.
+PUERTO_SERIAL = '/dev/rfcomm0'
+# Con la interfaz bluetooth configurada se usa esta dirección
 BAUDRATE      = 115200
 TIMEOUT_S     = 2            # Segundos de espera por una línea
 
@@ -79,6 +81,9 @@ ETIQUETAS_NIVEL = {
     2: "ALERTA",          # Antes Nivel 3 y 4
     3: "PELIGRO CRÍTICO", # Antes Nivel 5
 }
+
+# Variable para rastrear el último nivel de peligro enviado a la placa
+_ultimo_nivel: int | None = None
 
 def procesar_linea(linea_cruda: str, coleccion) -> dict:
     """
@@ -118,8 +123,48 @@ def procesar_linea(linea_cruda: str, coleccion) -> dict:
         f"Llama:{documento['llama']} | "
         f"Peligro: {resultado['puntos']:.1f}pts → Nivel {resultado['nivel_peligro']} {etiqueta}"
     )
+    # Enviar nivel de peligro a la placa solo si cambia respecto al último enviado
+    global _ultimo_nivel
+    if _ultimo_nivel != resultado['nivel_peligro']:
+        enviado = enviar_nivel_peligro_placa(resultado['nivel_peligro'])
+        if enviado:
+            _ultimo_nivel = resultado['nivel_peligro']
+    else:
+        # Nivel no cambió, no enviar
+        pass
 
-    return documento
+def enviar_nivel_peligro_placa(nivel_peligro: int) -> bool:
+    """Envía el nivel de peligro a la placa vía serial.
+
+    Args:
+        nivel_peligro: Nivel de peligro calculado (1, 2 o 3).
+
+    Returns:
+        bool: True si se envió correctamente, False en caso de error o si la
+        comunicación serial no está disponible.
+    """
+    # Verificar disponibilidad de pyserial
+    if not SERIAL_DISPONIBLE:
+        print("[Serial] pyserial no está disponible. No se envía nivel de peligro.")
+        return False
+    # Validar nivel
+    if nivel_peligro not in ETIQUETAS_NIVEL:
+        print(f"[Serial] Nivel de peligro inválido: {nivel_peligro}")
+        return False
+    try:
+        ser = serial.Serial(PUERTO_SERIAL, BAUDRATE, timeout=TIMEOUT_S)
+        ser.write(str(nivel_peligro).encode())
+        ser.flush()
+        print(f"[Serial] Nivel {nivel_peligro} enviado a placa.")
+        return True
+    except serial.SerialException as e:
+        print(f"[Serial] Error al enviar nivel de peligro: {e}")
+        return False
+    finally:
+        try:
+            ser.close()
+        except Exception:
+            pass
 
 def procesar_linea_dashboard(linea_cruda: str, sio_client=None) -> dict:
     """
@@ -147,9 +192,8 @@ def procesar_linea_dashboard(linea_cruda: str, sio_client=None) -> dict:
     if sio_client and sio_client.connected:
         try:
             sio_client.emit('nuevo_dato', documento)
-            print(f"[Dashboard] 🚀 Datos inyectados en tiempo real (Nivel {resultado['nivel_peligro']})")
         except Exception as e:
-            print(f"[Dashboard] ❌ Error de inyección: {e}")
+            print(f"[Dashboard] Error de inyección de datos: {e}")
     
     return documento
 
@@ -168,9 +212,9 @@ def iniciar_streaming_serial(coleccion, sio_client=None):
     print(f"[Serial] Abriendo puerto {PUERTO_SERIAL} a {BAUDRATE} baudios...")
     try:
         ser = serial.Serial(PUERTO_SERIAL, BAUDRATE, timeout=TIMEOUT_S)
-        print(f"[Serial] ✅ Puerto abierto. Escuchando Arduino...")
+        print(f"[Serial] Puerto abierto. Escuchando Arduino...")
     except serial.SerialException as e:
-        print(f"[Serial] ❌ Error al abrir puerto: {e}")
+        print(f"[Serial] Error al abrir puerto: {e}")
         return
 
     print("\nPresiona Ctrl+C para detener el streaming.\n")
@@ -192,46 +236,11 @@ def iniciar_streaming_serial(coleccion, sio_client=None):
         ser.close()
 
 # ==============================================================================
-# MODO SIMULACIÓN: Para probar sin Arduino físico
-# ==============================================================================
-
-DATOS_SIMULACION = [
-    '{"humo": 0, "movimiento": 0, "llama": 0, "luz": 450, "temperatura": 20.5, "humedad": 68.0}',
-    '{"humo": 0, "movimiento": 1, "llama": 0, "luz": 800, "temperatura": 24.2, "humedad": 72.0}',
-    '{"humo": 1, "movimiento": 0, "llama": 0, "luz": 1200, "temperatura": 29.0, "humedad": 78.0}',
-    '{"humo": 1, "movimiento": 1, "llama": 0, "luz": 2000, "temperatura": 33.0, "humedad": 81.0}',
-    '{"humo": 1, "movimiento": 1, "llama": 1, "luz": 55000, "temperatura": 44.0, "humedad": 87.0}',
-    # Formato CSV crudo (como podría enviarlo un Arduino simple)
-    '0,0,0,300,19.0,65.0',
-    '1,1,1,78000,49.5,91.0',
-]
-
-def iniciar_streaming_simulado(coleccion, sio_client=None, intervalo_s: float = 2.0):
-    """
-    Simula un streaming del Arduino con datos de prueba.
-    Útil para desarrollo y demos sin hardware físico.
-    """
-    print("[Simulación] Modo de prueba sin Arduino físico.")
-    print(f"[Simulación] Enviando {len(DATOS_SIMULACION)} lecturas con pausa de {intervalo_s}s...")
-    if sio_client: print("[Simulación] Inyectando también al Dashboard.")
-    try:
-        for i, linea in enumerate(DATOS_SIMULACION):
-            procesar_linea(linea, coleccion)
-            if sio_client:
-                procesar_linea_dashboard(linea, sio_client)
-            time.sleep(intervalo_s)
-        print("\n[Simulación] ✅ Todas las lecturas procesadas.")
-    except KeyboardInterrupt:
-        print("\n[Simulación] Detenido por el usuario.")
-
-# ==============================================================================
 # PUNTO DE ENTRADA
 # ==============================================================================
 
 if __name__ == '__main__':
-    print("=" * 55)
-    print("  SLAK IoT — Pipeline de Streaming Serial → MongoDB")
-    print("=" * 55)
+    print("SLAK IoT — Streaming Serial → MongoDB | Socket")
 
     # Inicializar cliente de Sockets para el Dashboard
     sio = None
@@ -240,9 +249,9 @@ if __name__ == '__main__':
         try:
             # Dirección del servidor Flask (ajusta si corre en otro host/puerto)
             sio.connect('http://localhost:5000')
-            print("[SocketIO] ✅ Conectado al Dashboard de Flask.")
+            print("[SocketIO] Conectado al Dashboard de Flask.")
         except Exception:
-            print("[SocketIO] ⚠️ No se pudo conectar al Dashboard. Los datos solo se guardarán en MongoDB.")
+            print("[SocketIO] No se pudo conectar al Dashboard. Los datos solo se guardarán en MongoDB.")
             sio = None
 
     try:
@@ -250,8 +259,3 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[ERROR] No se pudo conectar a MongoDB: {e}")
         sys.exit(1)
-
-    # Detectar si hay Arduino físico disponible
-    # Para cambiar a modo real: cambia a iniciar_streaming_serial(coleccion)
-    # iniciar_streaming_simulado(coleccion, sio_client=sio, intervalo_s=1.0)
-    iniciar_streaming_serial(coleccion, sio_client=sio)

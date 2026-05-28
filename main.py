@@ -10,7 +10,7 @@ sys.path.insert(0, str(BASE_DIR))
 # Cargar variables de entorno globalmente para los módulos SMTP y Twilio
 load_dotenv(BASE_DIR / '.env')
 
-from ControlMongo.stream_iot_mongo import iniciar_streaming_serial, conectar_mongo, SIO_DISPONIBLE
+from ControlMongo.stream_iot_mongo import iniciar_streaming_serial, conectar_mongo, SIO_DISPONIBLE, enviar_nivel_peligro_placa
 try:
     import socketio
 except ImportError:
@@ -38,7 +38,9 @@ class ColeccionWrapper:
             nivel = int(nivel) # Asegurar comparación numérica
             ahora = time.time()
             cooldown_pasado = (ahora - self._ultimo_tiempo_mensaje) >= 60 
-            
+            ha_cambiado_peligro = (nivel != self._ultimo_nivel_alerta)
+            if (ha_cambiado_peligro):
+                enviar_nivel_peligro_placa(nivel)
             # Si el peligro aumenta (ej. de 2 a 3 o de 1 a 2), ignoramos el cooldown para alertar rápido
             ha_subido_peligro = (nivel > self._ultimo_nivel_alerta)
             
@@ -67,7 +69,6 @@ class ColeccionWrapper:
                 else:
                     print(f"[Alertas] [Bloqueado] Nivel {nivel} omitido (Cooldown activo y nivel no ha subido).")
             
-            # Actualizar siempre el historial del nivel, aunque no se envíe alerta (crucial para detectar subidas)
             self._ultimo_nivel_alerta = nivel
             
         return resultado

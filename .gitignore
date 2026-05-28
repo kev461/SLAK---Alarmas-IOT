@@ -4,4 +4,4 @@
 *.jpeg
 uploads/*
 flask_alarmas/__pycache__/*
-
+Modulos/__pycache__/*

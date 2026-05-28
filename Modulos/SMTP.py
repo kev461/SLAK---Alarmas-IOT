@@ -26,7 +26,7 @@ def enviar_mensaje(destinatario, asunto, cuerpo):
 
 
 def ejecutar_envio_alertas():
-    """Carga los correos actuales y envía las alertas."""
+    # """Carga los correos actuales y envía las alertas."""
     dfCorreos = Crear_Excel.obtener_df_correos()
 
     if dfCorreos.empty:
