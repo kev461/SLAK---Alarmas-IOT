@@ -51,7 +51,7 @@
     </main>
 
     <!-- Botón Flotante IOT -->
-    <button type="button" class="btn shadow-lg rounded-circle d-flex align-items-center justify-content-center" 
+    <button type="button" class="btn shadow-lg rounded-circle d-flex align-items-center justify-content-center"
         style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 1050; background-color: var(--marron-grafito, #333); color: white; border: none;"
         data-bs-toggle="modal" data-bs-target="#iotModal">
         <i class="fas fa-microchip"></i>
@@ -60,33 +60,38 @@
     <!-- Modal de Control IOT -->
     <div class="modal fade" id="iotModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0" style="border-radius: 0; background-color: #fdfdfd;">
+            <div class="modal-content border-0" style="border-radius: 15px; background-color: #fdfdfd;">
                 <div class="modal-header border-0 pb-0">
-                    <span class="monitor-label" style="font-size: 0.7rem; letter-spacing: 0.2em; color: var(--arena-nuez, #C1AA8D);">CONTROL REMOTO HC-05</span>
+                    <span class="monitor-label"
+                        style="font-size: 0.7rem; letter-spacing: 0.2em; color: var(--arena-nuez, #C1AA8D);">CONTROL
+                        REMOTO HC-05</span>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4 pt-2">
                     <h2 class="fw-bold mb-4" style="color: var(--marron-grafito, #333); border: none;">Dispositivos</h2>
-                    
-                    <div class="d-flex justify-content-center gap-5 text-center py-3"></div>
+
+                    <div class="d-flex justify-content-center gap-5 text-center py-3">
                         <!-- Control Luz -->
                         <div class="d-flex flex-column align-items-center">
                             <span class="monitor-label mb-3">Iluminación</span>
-                            <button id="btnLuzIot" class="btn rounded-circle d-flex align-items-center justify-content-center shadow-sm border-0" 
+                            <button id="btnLuzIot"
+                                class="btn rounded-circle d-flex align-items-center justify-content-center shadow-sm border-0"
                                 style="width: 100px; height: 100px; font-size: 1.8rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                                 <i class="fas fa-lightbulb"></i>
                             </button>
-                            <span id="stateLuz" class="monitor-label mt-3" style="font-size: 0.65rem; color: var(--marron-grafito);">APAGADO</span>
+                            <span id="stateLuz" class="monitor-label mt-3"
+                                style="font-size: 0.65rem; color: var(--marron-grafito);">APAGADO</span>
                         </div>
-
                         <!-- Control Ventilador -->
                         <div class="d-flex flex-column align-items-center">
                             <span class="monitor-label mb-3">Ventilación</span>
-                            <button id="btnVentIot" class="btn rounded-circle d-flex align-items-center justify-content-center shadow-sm border-0" 
+                            <button id="btnVentIot"
+                                class="btn rounded-circle d-flex align-items-center justify-content-center shadow-sm border-0"
                                 style="width: 100px; height: 100px; font-size: 1.8rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                                 <i class="fas fa-fan"></i>
                             </button>
-                            <span id="stateVent" class="monitor-label mt-3" style="font-size: 0.65rem; color: var(--marron-grafito);">APAGADO</span>
+                            <span id="stateVent" class="monitor-label mt-3"
+                                style="font-size: 0.65rem; color: var(--marron-grafito);">APAGADO</span>
                         </div>
                     </div>
                 </div>
@@ -142,7 +147,7 @@
             btnLuz.style.backgroundColor = configLuz[currentLuz].color;
             btnLuz.style.color = configLuz[currentLuz].textColor;
             spanLuz.innerText = configLuz[currentLuz].text;
-            
+
             // Efecto de brillo si está encendido
             btnLuz.style.boxShadow = currentLuz === 2 ? `0 0 20px ${configLuz[2].color}88` : 'none';
 
