@@ -68,20 +68,26 @@
                 <div class="modal-body p-4 pt-2">
                     <h2 class="fw-bold mb-4" style="color: var(--marron-grafito, #333); border: none;">Dispositivos</h2>
                     
-                    <!-- Control Luz -->
-                    <div class="mb-4">
-                        <label class="monitor-label d-block mb-2">Sistema de Iluminación</label>
-                        <button id="btnLuzIot" class="btn w-100 py-3 fw-bold border-0" style="letter-spacing: 0.1em; transition: all 0.3s ease;">
-                            LUZ: <span id="stateLuz">APAGADO</span>
-                        </button>
-                    </div>
+                    <div class="d-flex justify-content-center gap-5 text-center py-3"></div>
+                        <!-- Control Luz -->
+                        <div class="d-flex flex-column align-items-center">
+                            <span class="monitor-label mb-3">Iluminación</span>
+                            <button id="btnLuzIot" class="btn rounded-circle d-flex align-items-center justify-content-center shadow-sm border-0" 
+                                style="width: 100px; height: 100px; font-size: 1.8rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                                <i class="fas fa-lightbulb"></i>
+                            </button>
+                            <span id="stateLuz" class="monitor-label mt-3" style="font-size: 0.65rem; color: var(--marron-grafito);">APAGADO</span>
+                        </div>
 
-                    <!-- Control Ventilador -->
-                    <div>
-                        <label class="monitor-label d-block mb-2">Sistema de Ventilación</label>
-                        <button id="btnVentIot" class="btn w-100 py-3 fw-bold border-0" style="letter-spacing: 0.1em; transition: all 0.3s ease;">
-                            VENTILADOR: <span id="stateVent">APAGADO</span>
-                        </button>
+                        <!-- Control Ventilador -->
+                        <div class="d-flex flex-column align-items-center">
+                            <span class="monitor-label mb-3">Ventilación</span>
+                            <button id="btnVentIot" class="btn rounded-circle d-flex align-items-center justify-content-center shadow-sm border-0" 
+                                style="width: 100px; height: 100px; font-size: 1.8rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                                <i class="fas fa-fan"></i>
+                            </button>
+                            <span id="stateVent" class="monitor-label mt-3" style="font-size: 0.65rem; color: var(--marron-grafito);">APAGADO</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,13 +138,23 @@
             const btnVent = document.getElementById('btnVentIot');
             const spanVent = document.getElementById('stateVent');
 
+            // Actualizar Luz
             btnLuz.style.backgroundColor = configLuz[currentLuz].color;
             btnLuz.style.color = configLuz[currentLuz].textColor;
             spanLuz.innerText = configLuz[currentLuz].text;
+            
+            // Efecto de brillo si está encendido
+            btnLuz.style.boxShadow = currentLuz === 2 ? `0 0 20px ${configLuz[2].color}88` : 'none';
 
+            // Actualizar Ventilador
             btnVent.style.backgroundColor = configVent[currentVent].color;
             btnVent.style.color = configVent[currentVent].textColor;
             spanVent.innerText = configVent[currentVent].text;
+
+            // Animación de rotación para el ventilador si está ON
+            const iconVent = btnVent.querySelector('i');
+            if (currentVent === 1) iconVent.classList.add('fa-spin');
+            else iconVent.classList.remove('fa-spin');
         }
 
         async function sendIotCommand() {
