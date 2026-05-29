@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
 </head>
@@ -49,6 +50,44 @@
         {% endblock %}
     </main>
 
+    <!-- Botón Flotante IOT -->
+    <button type="button" class="btn shadow-lg rounded-circle d-flex align-items-center justify-content-center" 
+        style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 1050; background-color: var(--marron-grafito, #333); color: white; border: none;"
+        data-bs-toggle="modal" data-bs-target="#iotModal">
+        <i class="fas fa-microchip"></i>
+    </button>
+
+    <!-- Modal de Control IOT -->
+    <div class="modal fade" id="iotModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 0; background-color: #fdfdfd;">
+                <div class="modal-header border-0 pb-0">
+                    <span class="monitor-label" style="font-size: 0.7rem; letter-spacing: 0.2em; color: var(--arena-nuez, #C1AA8D);">CONTROL REMOTO HC-05</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 pt-2">
+                    <h2 class="fw-bold mb-4" style="color: var(--marron-grafito, #333); border: none;">Dispositivos</h2>
+                    
+                    <!-- Control Luz -->
+                    <div class="mb-4">
+                        <label class="monitor-label d-block mb-2">Sistema de Iluminación</label>
+                        <button id="btnLuzIot" class="btn w-100 py-3 fw-bold border-0" style="letter-spacing: 0.1em; transition: all 0.3s ease;">
+                            LUZ: <span id="stateLuz">APAGADO</span>
+                        </button>
+                    </div>
+
+                    <!-- Control Ventilador -->
+                    <div>
+                        <label class="monitor-label d-block mb-2">Sistema de Ventilación</label>
+                        <button id="btnVentIot" class="btn w-100 py-3 fw-bold border-0" style="letter-spacing: 0.1em; transition: all 0.3s ease;">
+                            VENTILADOR: <span id="stateVent">APAGADO</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container text-center">
             <div class="mb-4">
@@ -71,6 +110,65 @@
                 nav.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.1)';
             }
         });
+
+        // Lógica de Control IOT
+        let currentLuz = 0; // 0: Off, 1: Auto, 2: On
+        let currentVent = 0; // 0: Off, 1: On
+
+        const configLuz = [
+            { text: "APAGADO", color: "#C1AA8D", textColor: "white" },   // arena-nuez
+            { text: "AUTOMÁTICO", color: "#D4A373", textColor: "white" }, // canela-suave
+            { text: "ENCENDIDO", color: "#B15636", textColor: "white" }   // ambar-oxido
+        ];
+
+        const configVent = [
+            { text: "APAGADO", color: "#C1AA8D", textColor: "white" },
+            { text: "ENCENDIDO", color: "#B15636", textColor: "white" }
+        ];
+
+        function updateIotUI() {
+            const btnLuz = document.getElementById('btnLuzIot');
+            const spanLuz = document.getElementById('stateLuz');
+            const btnVent = document.getElementById('btnVentIot');
+            const spanVent = document.getElementById('stateVent');
+
+            btnLuz.style.backgroundColor = configLuz[currentLuz].color;
+            btnLuz.style.color = configLuz[currentLuz].textColor;
+            spanLuz.innerText = configLuz[currentLuz].text;
+
+            btnVent.style.backgroundColor = configVent[currentVent].color;
+            btnVent.style.color = configVent[currentVent].textColor;
+            spanVent.innerText = configVent[currentVent].text;
+        }
+
+        async function sendIotCommand() {
+            try {
+                const response = await fetch('/enviar_datos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ luz: currentLuz, ventilador: currentVent })
+                });
+                const data = await response.json();
+                console.log("Comando enviado:", data.comando);
+            } catch (error) {
+                console.error("Error al enviar comando IOT:", error);
+            }
+        }
+
+        document.getElementById('btnLuzIot').addEventListener('click', () => {
+            currentLuz = (currentLuz + 1) % 3;
+            updateIotUI();
+            sendIotCommand();
+        });
+
+        document.getElementById('btnVentIot').addEventListener('click', () => {
+            currentVent = (currentVent + 1) % 2;
+            updateIotUI();
+            sendIotCommand();
+        });
+
+        // Inicialización visual
+        updateIotUI();
     </script>
 </body>
 

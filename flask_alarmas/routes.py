@@ -2,6 +2,7 @@ from flask import render_template, request, jsonify
 import Modulos.Crear_Excel as Crear_Excel
 import Modulos.Modificación_Correos as Modificación_Correos
 import Modulos.SMTP as SMTP
+import Modulos.enviar_datos_createpi as enviar_datos_createpi
 import os
 from datetime import datetime, timedelta
 from pymongo import MongoClient
@@ -47,6 +48,20 @@ def registrar_rutas(app):
             correos_df=dfCorreos,
             resultado=mensaje
         )
+
+    @app.route('/enviar_datos', methods=['POST'])
+    def enviar_datos():
+        """Recibe los estados de luz y ventilador y los envía al HC-05."""
+        data = request.get_json()
+        luz = data.get('luz', 0)
+        ventilador = data.get('ventilador', 0)
+
+        # Llamamos al archivo especializado para procesar y enviar
+        exito = enviar_datos_createpi.procesar_y_enviar(luz, ventilador)
+
+        if exito:
+            return jsonify({"estado": "exitoso", "comando": f"{luz}{ventilador}1"}), 200
+        return jsonify({"estado": "error", "mensaje": "Fallo en la comunicación serial"}), 500
 
     @app.route('/api/ultimo', methods=['GET'])
     def api_ultimo():
